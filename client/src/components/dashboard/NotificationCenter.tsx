@@ -6,6 +6,7 @@ import { Bell, Check, Loader2, Info, CheckCircle, Mail, X } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { useRouter, usePathname } from 'next/navigation';
+import { API_URL } from '@/api/talentXApi';
 
 interface Notification {
     id: string;
@@ -95,8 +96,8 @@ export default function NotificationCenter({ userId }: NotificationCenterProps) 
         queryKey: ['notifications', userId],
         queryFn: async () => {
             const url = userId
-                ? `https://acme-ai-lqwv.onrender.com/api/applications/notifications?userId=${userId}`
-                : `https://acme-ai-lqwv.onrender.com/api/applications/notifications`;
+                ? `${API_URL}/applications/notifications?userId=${userId}`
+                : `${API_URL}/applications/notifications`;
 
             const res = await fetch(url, {
                 headers: {
@@ -113,7 +114,7 @@ export default function NotificationCenter({ userId }: NotificationCenterProps) 
 
     const markReadMutation = useMutation({
         mutationFn: async (id: string) => {
-            const res = await fetch(`https://acme-ai-lqwv.onrender.com/api/applications/notifications/${id}/read`, {
+            const res = await fetch(`${API_URL}/applications/notifications/${id}/read`, {
                 method: 'PATCH',
                 headers: {
                     'Authorization': `Bearer ${localStorage.getItem('talentx_token')}`

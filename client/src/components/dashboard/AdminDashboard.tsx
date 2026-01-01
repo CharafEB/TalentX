@@ -16,7 +16,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ExternalLink, Check, X, Trash2, Mail, Plus, User as UserIcon, Users, Briefcase } from 'lucide-react';
 import { useToast } from "@/components/ui/use-toast";
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { talentXApi } from '@/api/talentXApi';
+import { talentXApi, API_URL } from '@/api/talentXApi';
 import Link from 'next/link';
 import { createPageUrl } from '@/utils';
 import { motion } from 'framer-motion';
@@ -62,8 +62,8 @@ export default function AdminDashboard() {
     const fetchAppAppNotifications = async () => {
         try {
             const [appsRes, notifsRes] = await Promise.all([
-                fetch('http://localhost:5000/api/applications/list'),
-                fetch('http://localhost:5000/api/applications/notifications')
+                fetch(`${API_URL}/applications/list`),
+                fetch(`${API_URL}/applications/notifications`)
             ]);
             if (appsRes.ok) setApplications(await appsRes.json());
             if (notifsRes.ok) setNotifications(await notifsRes.json());
@@ -201,7 +201,7 @@ export default function AdminDashboard() {
     // --- Actions (Original Logic) ---
     const updateAppStatus = async (id: string, status: string, type: string) => {
         try {
-            const response = await fetch(`http://localhost:5000/api/applications/status/${id}`, {
+            const response = await fetch(`${API_URL}/applications/status/${id}`, {
                 method: 'PATCH',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ status, type })
@@ -219,7 +219,7 @@ export default function AdminDashboard() {
     const deleteApplication = async (id: string) => {
         if (!confirm("Are you sure you want to delete this application?")) return;
         try {
-            const response = await fetch(`http://localhost:5000/api/applications/${id}`, { method: 'DELETE' });
+            const response = await fetch(`${API_URL}/applications/${id}`, { method: 'DELETE' });
             if (response.ok) {
                 toast({ title: "Application deleted" });
                 fetchAppAppNotifications();
@@ -344,7 +344,7 @@ export default function AdminDashboard() {
                                 <CardTitle className='text-black'>Applications Management</CardTitle>
                                 <div className="flex gap-2">
                                     <Button size="sm" onClick={() => {
-                                        fetch('http://localhost:5000/api/applications/sheet-url')
+                                        fetch(`${API_URL}/applications/sheet-url`)
                                             .then(res => res.json())
                                             .then(data => {
                                                 if (data.url) window.open(data.url, '_blank');

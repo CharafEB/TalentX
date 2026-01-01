@@ -7,6 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { ChevronRight, ChevronLeft, Upload, CheckCircle2 } from 'lucide-react';
 import { useToast } from "@/components/ui/use-toast";
+import { API_URL } from '@/api/talentXApi';
 
 interface ApplyFormProps {
     onSuccess: () => void;
@@ -89,7 +90,7 @@ export default function ApplyForm({ onSuccess }: ApplyFormProps) {
             data.append('password', 'ChangesRequired123!');
             data.append('resume', resumeFile);
 
-            const response = await fetch('http://localhost:5000/api/applications/submit', {
+            const response = await fetch(`${API_URL}/applications/submit`, {
                 method: 'POST',
                 body: data,
             });
