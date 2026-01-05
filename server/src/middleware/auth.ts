@@ -1,43 +1,95 @@
-import { Request, Response, NextFunction } from 'express';
-import jwt from 'jsonwebtoken';
+import { Request, Response, NextFunction } from "express";
+import jwt from "jsonwebtoken";
 
-const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key';
+const JWT_SECRET = process.env.JWT_SECRET || "your-secret-key";
 
 export interface AuthRequest extends Request {
-    user?: {
-        id: string;
-        email: string;
-        role: string;
-    };
+  user?: {
+    id: string;
+    email: string;
+    role: string;
+  };
 }
 
-export const authenticateToken = (req: AuthRequest, res: Response, next: NextFunction) => {
-    const authHeader = req.headers['authorization'];
-    const token = authHeader && authHeader.split(' ')[1];
-
-    if (!token) {
-        return res.status(401).json({ message: 'Access token required' });
-    }
-
-    jwt.verify(token, JWT_SECRET, (err: any, user: any) => {
-        if (err) {
-            return res.status(403).json({ message: 'Invalid or expired token' });
-        }
-        req.user = user;
-        next();
-    });
+type user = {
+  id: string;
+  email: string;
+  role: string;
 };
 
+export class JWTService {
+  //Generate Token for user
+  static generateToken(userInformation: user) {
+    return jwt.sign(userInformation, JWT_SECRET);
+  }
+
+  //Verify the Token for controller
+  static decodeToken(Token: any) {
+    return jwt.verify(Token, JWT_SECRET);
+  }
+
+  //Extract the cookie
+  static extractToken(req: any) {
+    // Changed to match the name used in authController
+    const token = req.cookies.access_token;
+    if (token) {
+      return token;
+    }
+    return null;
+  }
+}
+
+export const authenticateToken = async (
+  req: any,
+  res: any,
+  next: NextFunction
+) => {
+  try {
+    console.log(req.cookies);
+    console.log(req.cookies.access_token);
+
+    //Extract the token from user cookie
+    const authToken = JWTService.extractToken(req);
+    //verify the user token
+    const token = JWTService.decodeToken(authToken);
+    if (!token) {
+      return res.status(401).json({
+        success: false,
+        message: "Access denied. No token provided.",
+        code: "NO_TOKEN",
+      });
+    }
+
+    // Assign user data to request object for use in controllers
+    req.user = token as any;
+
+    next();
+  } catch (error: any) {
+    return res.status(401).json({
+      success: false,
+      message: "Invalid or expired token",
+      code: "INVALID_TOKEN",
+      error: error.message,
+    });
+  }
+};
+
+
 export const requireRole = (roles: string[]) => {
-    return (req: AuthRequest, res: Response, next: NextFunction) => {
-        if (!req.user) {
-            return res.status(401).json({ message: 'Unauthorized' });
-        }
+  return (req: AuthRequest, res: Response, next: NextFunction) => {
+    const token = JWTService.extractToken(req);
 
-        if (!roles.includes(req.user.role)) {
-            return res.status(403).json({ message: 'Forbidden: Insufficient permissions' });
-        }
+    if (!token) {
+      return res.status(401).json({ message: "Unauthorized" });
+    }
 
-        next();
-    };
+    const userRole: any = jwt.decode(token);
+
+    if (!userRole || !userRole.role || !roles.includes(userRole.role)) {
+      return res
+        .status(403)
+        .json({ message: "Forbidden: Insufficient permissions" });
+    }
+    next();
+  };
 };
