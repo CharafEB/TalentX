@@ -23,26 +23,13 @@ import { prisma } from "./prisma";
 const app = express();
 const port = process.env.PORT || 5000;
 
-const allowedOrigins = [
-  process.env.CLIENT_URL,
-  'http://localhost:3000',
-  'https://acme-ai-lqwv.onrender.com'
-].filter(Boolean) as string[];
+const clientUrl = process.env.CLIENT_URL || 'http://localhost:3000';
 
 app.use(cors({
-  origin: (origin, callback) => {
-    // Allow requests with no origin (like mobile apps or curl requests)
-    if (!origin) return callback(null, true);
-
-    if (allowedOrigins.includes(origin)) {
-      callback(null, true);
-    } else {
-      // Create an error that doesn't leak internal details but blocks the request
-      callback(new Error('Not allowed by CORS'));
-    }
-  },
+  origin: clientUrl,
   credentials: true
 }));
+
 app.use(express.json());
 app.use(cookieParser());
 // Serve uploaded files
