@@ -15,7 +15,7 @@ services:
   server:
     build: ./server
     ports:
-      - "5000:5000"
+      - "8000:8000"
     environment:
       DATABASE_URL: postgresql://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD:-password}@db:5432/${POSTGRES_DB:-talentx}?schema=public
       JWT_SECRET: ${JWT_SECRET:-secret}
@@ -27,7 +27,7 @@ services:
     ports:
       - "3000:3000"
     environment:
-      NEXT_PUBLIC_API_URL: http://server:5000/api
+      NEXT_PUBLIC_API_URL: http://server:8000/api
     depends_on:
       - server
 
