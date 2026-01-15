@@ -51,20 +51,21 @@ import {
 } from "@/shared/components/ui/tabs";
 import AdminDashboard from "@/widgets/Dashboard/AdminDashboard";
 
+type TabValue =
+  | "overview"
+  | "projects"
+  | "messages"
+  | "tasks"
+  | "users"
+  | "stats"
+  | "hire"
+  | "settings";
+
 function DashboardContent() {
   const router = useRouter();
   const queryClient = useQueryClient();
   const { user, logout } = useAuthStore();
-  const [activeView, setActiveView] = useState<
-    | "overview"
-    | "projects"
-    | "messages"
-    | "tasks"
-    | "users"
-    | "stats"
-    | "hire"
-    | "settings"
-  >("overview");
+  const [activeView, setActiveView] = useState<TabValue>("overview");
   const [selectedProject, setSelectedProject] = useState<string | null>(null);
   const [selectedTask, setSelectedTask] = useState<Task | null>(null);
   const [taskViewMode, setTaskViewMode] = useState<"board" | "list">("board");
@@ -1943,7 +1944,7 @@ function DashboardContent() {
       <div className="flex-1 max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 py-8">
         <Tabs
           value={activeView}
-          onValueChange={(v) => setActiveView(v as any)}
+           onValueChange={(v) => setActiveView(v as TabValue)}
           className="w-full"
         >
           <TabsList className="flex gap-3 justify-start flex-wrap mb-8">
