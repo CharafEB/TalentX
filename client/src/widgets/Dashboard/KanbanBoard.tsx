@@ -7,7 +7,7 @@ import { motion } from 'framer-motion';
 interface KanbanBoardProps {
     tasks: Task[];
     onTaskClick: (task: Task) => void;
-    onUpdateStatus: (taskId: string, newStatus: string) => void;
+    onUpdateStatus: (taskId: string, newStatus: Task["status"]) => void;
 }
 
 const KanbanBoard: React.FC<KanbanBoardProps> = ({ tasks, onTaskClick, onUpdateStatus }) => {
@@ -16,7 +16,7 @@ const KanbanBoard: React.FC<KanbanBoardProps> = ({ tasks, onTaskClick, onUpdateS
         { id: 'in_progress', title: 'In Progress', icon: Clock, color: 'text-blue-500' },
         { id: 'review', title: 'Review', icon: AlertCircle, color: 'text-yellow-500' },
         { id: 'done', title: 'Done', icon: CheckCircle, color: 'text-green-500' }
-    ];
+    ] as const;
 
     return (
         <div className="grid md:grid-cols-4 gap-6 overflow-x-auto pb-4">

@@ -50,6 +50,7 @@ import {
   TabsTrigger,
 } from "@/shared/components/ui/tabs";
 import AdminDashboard from "@/widgets/Dashboard/AdminDashboard";
+import { TasksView } from "@/widgets/Dashboard/TasksView";
 
 type TabValue =
   | "overview"
@@ -68,7 +69,7 @@ function DashboardContent() {
   const [activeView, setActiveView] = useState<TabValue>("overview");
   const [selectedProject, setSelectedProject] = useState<string | null>(null);
   const [selectedTask, setSelectedTask] = useState<Task | null>(null);
-  const [taskViewMode, setTaskViewMode] = useState<"board" | "list">("board");
+
   const [isTaskModalOpen, setIsTaskModalOpen] = useState(false);
 
   const searchParams = useSearchParams();
@@ -1944,7 +1945,7 @@ function DashboardContent() {
       <div className="flex-1 max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 py-8">
         <Tabs
           value={activeView}
-           onValueChange={(v) => setActiveView(v as TabValue)}
+          onValueChange={(v) => setActiveView(v as TabValue)}
           className="w-full"
         >
           <TabsList className="flex gap-3 justify-start flex-wrap mb-8">
@@ -2008,57 +2009,12 @@ function DashboardContent() {
           </TabsContent>
 
           <TabsContent value="tasks" className="mt-0">
-            <div className="space-y-6">
-              <div className="flex justify-between items-center mb-4">
-                <h1 className="text-2xl font-bold text-[#1a1a2e]">
-                  My Assigned Tasks
-                </h1>
-                <div className="bg-white p-1 rounded-xl flex items-center gap-1 border border-gray-200">
-                  <button
-                    onClick={() => setTaskViewMode("board")}
-                    className={`flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
-                      taskViewMode === "board"
-                        ? "bg-blue-50 text-[#204ecf]"
-                        : "text-gray-500 hover:text-gray-700"
-                    }`}
-                  >
-                    <LayoutGrid className="w-3.5 h-3.5" />
-                    Board
-                  </button>
-                  <button
-                    onClick={() => setTaskViewMode("list")}
-                    className={`flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
-                      taskViewMode === "list"
-                        ? "bg-blue-50 text-[#204ecf]"
-                        : "text-gray-500 hover:text-gray-700"
-                    }`}
-                  >
-                    <List className="w-3.5 h-3.5" />
-                    List
-                  </button>
-                </div>
-              </div>
-              {taskViewMode === "board" ? (
-                <KanbanBoard
-                  tasks={tasks || []}
-                  onTaskClick={(task) => {
-                    setSelectedTask(task);
-                    setIsTaskModalOpen(true);
-                  }}
-                  onUpdateStatus={(id, status) =>
-                    updateTaskMutation.mutate({ id, status: status as any })
-                  }
-                />
-              ) : (
-                <TaskListView
-                  tasks={tasks || []}
-                  onTaskClick={(task) => {
-                    setSelectedTask(task);
-                    setIsTaskModalOpen(true);
-                  }}
-                />
-              )}
-            </div>
+            <TasksView
+              setSelectedTask={setSelectedTask}
+              setIsTaskModalOpen={setIsTaskModalOpen}
+              onUpdateTask={(id, status) => updateTaskMutation.mutate({ id, status })} // Callback
+              tasks={tasks}
+            />
           </TabsContent>
 
           <TabsContent value="messages" className="mt-0">
