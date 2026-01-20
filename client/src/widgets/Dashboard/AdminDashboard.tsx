@@ -453,7 +453,7 @@ export default function AdminDashboard() {
     });
 
     return (
-        <div className="p-8 space-y-8 bg-gray-50 min-h-screen">
+        <div className="p-8 space-y-8  bg-blue min-h-screen">
 
 
             {selectedProject && user ? (

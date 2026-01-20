@@ -149,14 +149,44 @@ function DashboardContent() {
   const updateTaskMutation = useMutation({
     mutationFn: async ({
       id,
-      status,
+      ...data
     }: {
       id: string;
-      status: Task["status"];
-    }) => await talentXApi.entities.Task.update(id, { status }),
+      [key: string]: any;
+    }) => {
+      console.log('API Call - Updating task:', id, 'with data:', data);
+      const result = await talentXApi.entities.Task.update(id, data);
+      console.log('API Response:', result);
+      return result;
+    },
     onSuccess: () => {
+      console.log('Mutation successful - invalidating tasks cache');
       queryClient.invalidateQueries({ queryKey: ["tasks"] });
       toast.success("Task updated");
+    },
+    onError: (error: any) => {
+      console.error('Mutation failed:', error);
+      console.error('Error details:', error.response?.data || error.message);
+      toast.error(`Failed to update task: ${error.response?.data?.message || error.message}`);
+    },
+  });
+
+  const createTaskMutation = useMutation({
+    mutationFn: async (data: any) => {
+      console.log('API Call - Creating task:', data);
+      const result = await talentXApi.entities.Task.create(data);
+      console.log('API Response:', result);
+      return result;
+    },
+    onSuccess: () => {
+      console.log('Create mutation successful - invalidating tasks cache');
+      queryClient.invalidateQueries({ queryKey: ["tasks"] });
+      toast.success("Task created");
+    },
+    onError: (error: any) => {
+      console.error('Create mutation failed:', error);
+      console.error('Error details:', error.response?.data || error.message);
+      toast.error(`Failed to create task: ${error.response?.data?.message || error.message}`);
     },
   });
 
@@ -265,6 +295,21 @@ function DashboardContent() {
     setIsUserModalOpen(true);
   };
 
+  const handleTaskSave = (taskData: any) => {
+    if (selectedTask) {
+      // Update existing task
+      updateTaskMutation.mutate({
+        id: selectedTask.id,
+        ...taskData
+      });
+    } else {
+      // Create new task
+      createTaskMutation.mutate(taskData);
+    }
+    setIsTaskModalOpen(false);
+    setSelectedTask(null);
+  };
+
   const handleUserSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (editingUser) {
@@ -275,6 +320,8 @@ function DashboardContent() {
     } else {
       createUserMutation.mutate(userFormData as any);
     }
+    setIsUserModalOpen(false);
+    setEditingUser(null);
   };
 
   const { data: allUsers = [] } = useQuery({
@@ -338,46 +385,44 @@ function DashboardContent() {
               Estimates based on projects
             </p>
           </div>
-          <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-200">
-            <div className="flex items-center gap-3 mb-2">
-              <div className="w-10 h-10 bg-blue-50 rounded-lg flex items-center justify-center">
-                <Briefcase className="w-6 h-6 text-[#204ecf]" />
+          <div className="bg-white p-4 sm:p-6 rounded-2xl shadow-sm border border-gray-200 hover:shadow-md transition-shadow">
+            <div className="flex items-center gap-2 sm:gap-3 mb-2 sm:mb-3">
+              <div className="w-8 h-8 sm:w-10 sm:h-10 bg-blue-50 rounded-lg flex items-center justify-center">
+                <Briefcase className="w-4 h-4 sm:w-6 sm:h-6 text-[#204ecf]" />
               </div>
-              <h3 className="text-gray-500 text-sm font-medium uppercase">
+              <h3 className="text-xs sm:text-sm font-medium uppercase text-gray-500">
                 Projects
               </h3>
             </div>
-            <div className="mt-2 text-3xl font-bold text-[#1a1a2e]">
+            <div className="mt-1 sm:mt-2 text-2xl sm:text-3xl font-bold text-[#1a1a2e]">
               {talentProfile?.completed_projects || 0}
             </div>
             <p className="text-xs text-gray-400 mt-1">Completed assignments</p>
           </div>
-          <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-200">
-            <div className="flex items-center gap-3 mb-2">
-              <div className="w-10 h-10 bg-yellow-50 rounded-lg flex items-center justify-center">
-                <BarChart className="w-6 h-6 text-yellow-600" />
+          <div className="bg-white p-4 sm:p-6 rounded-2xl shadow-sm border border-gray-200 hover:shadow-md transition-shadow">
+            <div className="flex items-center gap-2 sm:gap-3 mb-2 sm:mb-3">
+              <div className="w-8 h-8 sm:w-10 sm:h-10 bg-yellow-50 rounded-lg flex items-center justify-center">
+                <BarChart className="w-4 h-4 sm:w-6 sm:h-6 text-yellow-600" />
               </div>
-              <h3 className="text-gray-500 text-sm font-medium uppercase">
+              <h3 className="text-xs sm:text-sm font-medium uppercase text-gray-500">
                 Rating
               </h3>
             </div>
-            <div className="mt-2 text-3xl font-bold text-[#1a1a2e]">
+            <div className="mt-1 sm:mt-2 text-2xl sm:text-3xl font-bold text-[#1a1a2e]">
               {talentProfile?.rating || "5.0"}
             </div>
-            <p className="text-xs text-yellow-600 mt-1">
-              Excellent performance
-            </p>
+            <p className="text-xs text-yellow-600 mt-1">Excellent performance</p>
           </div>
-          <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-200">
-            <div className="flex items-center gap-3 mb-2">
-              <div className="w-10 h-10 bg-purple-50 rounded-lg flex items-center justify-center">
-                <Plus className="w-6 h-6 text-purple-600" />
+          <div className="bg-white p-4 sm:p-6 rounded-2xl shadow-sm border border-gray-200 hover:shadow-md transition-shadow">
+            <div className="flex items-center gap-2 sm:gap-3 mb-2 sm:mb-3">
+              <div className="w-8 h-8 sm:w-10 sm:h-10 bg-purple-50 rounded-lg flex items-center justify-center">
+                <Plus className="w-4 h-4 sm:w-6 sm:h-6 text-purple-600" />
               </div>
-              <h3 className="text-gray-500 text-sm font-medium uppercase">
+              <h3 className="text-xs sm:text-sm font-medium uppercase text-gray-500">
                 Applications
               </h3>
             </div>
-            <div className="mt-2 text-3xl font-bold text-[#1a1a2e]">12</div>
+            <div className="mt-1 sm:mt-2 text-2xl sm:text-3xl font-bold text-[#1a1a2e]">12</div>
             <p className="text-xs text-gray-400 mt-1">Active bids</p>
           </div>
         </div>
@@ -395,7 +440,7 @@ function DashboardContent() {
                   </label>
                   <input
                     type="text"
-                    className="w-full px-4 py-2 rounded-xl border border-gray-200 focus:ring-2 focus:ring-[#204ecf] outline-none"
+                    className="w-full px-4 py-2  text-black rounded-xl border border-gray-200 focus:ring-2 focus:ring-[#204ecf] outline-none"
                     value={formData.title}
                     onChange={(e) =>
                       setFormData({ ...formData, title: e.target.value })
@@ -407,7 +452,7 @@ function DashboardContent() {
                     Category
                   </label>
                   <select
-                    className="w-full px-4 py-2 rounded-xl border border-gray-200 focus:ring-2 focus:ring-[#204ecf] outline-none bg-white font-medium"
+                    className="w-full px-4 py-2 text-black rounded-xl border border-gray-200 focus:ring-2 focus:ring-[#204ecf] outline-none bg-white font-medium"
                     value={formData.category}
                     onChange={(e) =>
                       setFormData({
@@ -430,7 +475,7 @@ function DashboardContent() {
                   </label>
                   <input
                     type="number"
-                    className="w-full px-4 py-2 rounded-xl border border-gray-200 focus:ring-2 focus:ring-[#204ecf] outline-none"
+                    className="w-full px-4 py-2 rounded-xl text-black border border-gray-200 focus:ring-2 focus:ring-[#204ecf] outline-none"
                     value={formData.hourly_rate}
                     onChange={(e) =>
                       setFormData({
@@ -446,7 +491,7 @@ function DashboardContent() {
                   </label>
                   <input
                     type="number"
-                    className="w-full px-4 py-2 rounded-xl border border-gray-200 focus:ring-2 focus:ring-[#204ecf] outline-none"
+                    className="w-full px-4 py-2 rounded-xl text-black border border-gray-200 focus:ring-2 focus:ring-[#204ecf] outline-none"
                     value={formData.experience_years}
                     onChange={(e) =>
                       setFormData({
@@ -463,7 +508,7 @@ function DashboardContent() {
                 </label>
                 <input
                   type="text"
-                  className="w-full px-4 py-2 rounded-xl border border-gray-200 focus:ring-2 focus:ring-[#204ecf] outline-none"
+                  className="w-full px-4 py-2 rounded-xl text-black border border-gray-200 focus:ring-2 focus:ring-[#204ecf] outline-none"
                   value={formData.skills.join(", ")}
                   onChange={(e) =>
                     setFormData({
@@ -478,12 +523,12 @@ function DashboardContent() {
                 />
               </div>
               <div>
-                <label className="block text-sm font-bold text-gray-700 mb-2">
+                <label className="block text-sm text-black font-bold text-gray-700 mb-2">
                   Professional Bio
                 </label>
                 <textarea
                   rows={4}
-                  className="w-full px-4 py-2 rounded-xl border border-gray-200 focus:ring-2 focus:ring-[#204ecf] outline-none resize-none"
+                  className="w-full px-4 py-2 rounded-xl text-black border border-gray-200 focus:ring-2 focus:ring-[#204ecf] outline-none resize-none"
                   value={formData.bio}
                   onChange={(e) =>
                     setFormData({ ...formData, bio: e.target.value })
@@ -581,9 +626,9 @@ function DashboardContent() {
             </div>
 
             {/* Recent Activity / Sidebar */}
-            <div className="space-y-6">
-              <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-200">
-                <h3 className="font-bold text-[#1a1a2e] mb-4">Availability</h3>
+            <div className="space-y-4">
+              <div className="bg-white h-48 p-6  rounded-2xl shadow-sm border border-gray-200">
+                <h3 className="font-bold text-[#1a1a2e] mb-8">Availability</h3>
                 <div className="flex items-center gap-2">
                   <div className="w-3 h-3 bg-green-500 rounded-full animate-pulse"></div>
                   <span className="font-bold text-gray-700">
@@ -595,9 +640,9 @@ function DashboardContent() {
                 </p>
               </div>
 
-              <div className="bg-[#1a1a2e] p-6 rounded-2xl text-white">
-                <h3 className="font-bold mb-4">Upgrade to Pro</h3>
-                <p className="text-sm text-gray-400 mb-6 font-medium">
+              <div className="bg-[#1a1a2e] h-48 p-6 rounded-2xl text-white">
+                <h3 className="font-bold mb-3">Upgrade to Pro</h3>
+                <p className="text-sm text-gray-400 mb-4 font-medium">
                   Get featured placements and direct client matchmaking.
                 </p>
                 <Button className="w-full bg-[#00c853] hover:bg-[#00a846] text-white border-none">
@@ -629,16 +674,16 @@ function DashboardContent() {
     };
 
     return (
-      <div className="max-w-4xl mx-auto space-y-8">
-        <div className="flex items-center justify-between">
-          <h1 className="text-2xl font-bold text-[#1a1a2e]">Settings</h1>
+      <div className="max-w-4xl xl:max-w-6xl mx-auto space-y-6 sm:space-y-8">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <h1 className="text-xl sm:text-2xl font-bold text-[#1a1a2e]">Settings</h1>
         </div>
 
         <div className="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden">
-          <div className="flex border-b border-gray-100">
+          <div className="flex flex-col sm:flex-row border-b border-gray-100">
             <button
               onClick={() => setActiveTab("profile")}
-              className={`px-8 py-4 text-sm font-bold transition-all ${
+              className={`px-4 sm:px-8 py-3 sm:py-4 text-xs sm:text-sm font-bold transition-all ${
                 activeTab === "profile"
                   ? "text-[#204ecf] border-b-2 border-[#204ecf]"
                   : "text-gray-400 hover:text-gray-600"
@@ -648,7 +693,7 @@ function DashboardContent() {
             </button>
             <button
               onClick={() => setActiveTab("billing")}
-              className={`px-8 py-4 text-sm font-bold transition-all ${
+              className={`px-4 sm:px-8 py-3 sm:py-4 text-xs sm:text-sm font-bold transition-all ${
                 activeTab === "billing"
                   ? "text-[#204ecf] border-b-2 border-[#204ecf]"
                   : "text-gray-400 hover:text-gray-600"
@@ -658,17 +703,17 @@ function DashboardContent() {
             </button>
           </div>
 
-          <div className="p-8">
+          <div className="p-4 sm:p-6 lg:p-8">
             {activeTab === "profile" ? (
-              <form onSubmit={handleSubmit} className="space-y-6">
-                <div className="grid md:grid-cols-2 gap-6">
+              <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-6">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
                   <div className="space-y-2">
-                    <label className="text-sm font-bold text-gray-700">
+                    <label className="text-xs sm:text-sm font-bold text-gray-700">
                       Full Name
                     </label>
                     <input
                       type="text"
-                      className="w-full px-4 py-2 rounded-xl border border-gray-200 focus:ring-2 focus:ring-[#204ecf] outline-none"
+                      className="w-full px-3 sm:px-4 py-2 rounded-xl border border-gray-200 text-black focus:ring-2 focus:ring-[#204ecf] outline-none"
                       value={formData.full_name}
                       onChange={(e) =>
                         setFormData({ ...formData, full_name: e.target.value })
@@ -676,12 +721,12 @@ function DashboardContent() {
                     />
                   </div>
                   <div className="space-y-2">
-                    <label className="text-sm font-bold text-gray-700">
+                    <label className="text-xs sm:text-sm font-bold text-gray-700">
                       Email Address
                     </label>
                     <input
                       type="email"
-                      className="w-full px-4 py-2 rounded-xl border border-gray-200 focus:ring-2 focus:ring-[#204ecf] outline-none"
+                      className="w-full px-3 sm:px-4 py-2 rounded-xl border border-gray-200 text-black focus:ring-2 focus:ring-[#204ecf] outline-none"
                       value={formData.email}
                       onChange={(e) =>
                         setFormData({ ...formData, email: e.target.value })
@@ -689,17 +734,17 @@ function DashboardContent() {
                     />
                   </div>
                   <div className="space-y-2">
-                    <label className="text-sm font-bold text-gray-700">
+                    <label className="text-xs sm:text-sm font-bold text-gray-700">
                       New Password (leave blank to keep current)
                     </label>
                     <input
                       type="password"
-                      className="w-full px-4 py-2 rounded-xl border border-gray-200 focus:ring-2 focus:ring-[#204ecf] outline-none"
+                      className="w-full px-3 sm:px-4 py-2 rounded-xl border text-black border-gray-200 focus:ring-2 focus:ring-[#204ecf] outline-none"
                       value={formData.password}
                       onChange={(e) =>
                         setFormData({ ...formData, password: e.target.value })
                       }
-                      placeholder="••••••••"
+                      placeholder="•••••••"
                     />
                   </div>
                 </div>
@@ -736,7 +781,7 @@ function DashboardContent() {
                   </p>
                   <Button
                     variant="outline"
-                    className="border-[#204ecf] text-[#204ecf] hover:bg-blue-50"
+                    className="border-[#204ecf] bg-[#204ecf] text-white hover:bg-blue-50"
                   >
                     Manage Subscription
                   </Button>
@@ -1007,17 +1052,17 @@ function DashboardContent() {
           </Button>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-          <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-200">
-            <div className="flex items-center gap-3 mb-2">
-              <div className="w-10 h-10 bg-green-50 rounded-lg flex items-center justify-center">
-                <DollarSign className="w-6 h-6 text-green-600" />
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 xl:gap-6">
+          <div className="bg-white p-4 sm:p-6 rounded-2xl shadow-sm border border-gray-200 hover:shadow-md transition-shadow">
+            <div className="flex items-center gap-2 sm:gap-3 mb-2 sm:mb-3">
+              <div className="w-8 h-8 sm:w-10 sm:h-10 bg-green-50 rounded-lg flex items-center justify-center">
+                <DollarSign className="w-4 h-4 sm:w-6 sm:h-6 text-green-600" />
               </div>
-              <h3 className="text-gray-500 text-sm font-medium uppercase">
+              <h3 className="text-xs sm:text-sm font-medium uppercase text-gray-500">
                 Revenue
               </h3>
             </div>
-            <div className="mt-2 text-3xl font-bold text-[#1a1a2e]">
+            <div className="mt-1 sm:mt-2 text-2xl sm:text-3xl font-bold text-[#1a1a2e]">
               ${(agencyProfile?.completed_projects || 0) * 5000}
             </div>
             <p className="text-xs text-gray-400 mt-1">Platform earnings</p>
@@ -1940,15 +1985,15 @@ function DashboardContent() {
 
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col">
-      <div className="flex-1 max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 py-8">
+      <div className="flex-1 max-w-7xl xl:max-w-8xl mx-auto w-full px-3 sm:px-4 lg:px-6 xl:px-8 py-6 sm:py-8">
         <Tabs
           value={activeView}
           onValueChange={(v) => setActiveView(v as TabValue)}
           className="w-full"
         >
-          <TabsList className="flex gap-3 justify-start flex-wrap mb-8">
+          <TabsList className="flex gap-2 sm:gap-3 justify-start flex-wrap mb-6 sm:mb-8">
             {TALENT_DASHBOARD_TABS.map((tab) => (
-              <TabsTrigger key={tab.value} value={tab.value}>
+              <TabsTrigger key={tab.value} value={tab.value} className="text-xs sm:text-sm px-3 sm:px-4 py-2">
                 {tab.label}
               </TabsTrigger>
             ))}
@@ -1995,8 +2040,8 @@ function DashboardContent() {
             setIsTaskModalOpen(false);
             setSelectedTask(null);
           }}
-          onSave={() => {}}
-          isSaving={false}
+          onSave={handleTaskSave}
+          isSaving={createTaskMutation.isPending || updateTaskMutation.isPending}
         />
       )}
     </div>
