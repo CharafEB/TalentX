@@ -139,14 +139,14 @@ const TimeTrackingSection = ({ projectId, currentUser, logs, onRefresh }: any) =
     };
 
     return (
-        <Card className="rounded-2xl border-[#e2e8f0] shadow-sm overflow-hidden">
-            <CardHeader className="bg-gray-50/50 border-b flex flex-row items-center justify-between py-4">
-                <CardTitle className="text-lg flex items-center gap-2">
-                    <Clock className="w-5 h-5 text-blue-600" />
+        <Card className="rounded-2xl bg-white shadow-sm overflow-hidden">
+            <CardHeader className="border-b flex flex-row items-center justify-between py-4">
+                <CardTitle className="text-lg text-black flex items-center gap-2">
+                    <Clock className="w-5 h-5 text-black" />
                     Work Logs
                 </CardTitle>
                 {isTalent && !showLogForm && (
-                    <Button size="sm" onClick={() => setShowLogForm(true)} className="bg-[#204ecf] hover:bg-[#1a3da8] text-white rounded-xl">
+                    <Button size="sm" onClick={() => setShowLogForm(true)} className=" hover:bg-[#1a3da8] text-white rounded-xl">
                         <Plus className="w-4 h-4 mr-2" />
                         Log Hours
                     </Button>
@@ -154,41 +154,54 @@ const TimeTrackingSection = ({ projectId, currentUser, logs, onRefresh }: any) =
             </CardHeader>
             <CardContent className="p-0">
                 {showLogForm && (
-                    <form onSubmit={handleLogTime} className="p-6 bg-blue-50/30 border-b space-y-4">
-                        <div className="grid grid-cols-2 gap-4">
+                    <form onSubmit={handleLogTime} className="p-4 sm:p-6 border-b space-y-4">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                             <div className="space-y-2">
-                                <Label>Date</Label>
-                                <Input
-                                    type="date"
-                                    value={date}
-                                    onChange={(e) => setDate(e.target.value)}
-                                    className="rounded-xl"
-                                />
+                                <Label className="text-sm font-medium">Date</Label>
+                                <div className="flex w-full items-center">
+                                    <Input
+                                        type="date"
+                                        value={date}
+                                        onChange={(e) => setDate(e.target.value)}
+                                        className="rounded-xl bg-white text-black w-full"
+                                    />
+                                </div>
                             </div>
                             <div className="space-y-2">
-                                <Label>Hours</Label>
+                                <Label className="text-sm font-medium">Hours</Label>
                                 <Input
                                     type="number"
                                     step="0.5"
                                     placeholder="e.g. 4.5"
                                     value={hours}
                                     onChange={(e) => setHours(e.target.value)}
-                                    className="rounded-xl"
+                                    className="rounded-xl bg-white text-black w-full"
                                 />
                             </div>
                         </div>
                         <div className="space-y-2">
-                            <Label>What did you work on?</Label>
+                            <Label className="text-sm font-medium">What did you work on?</Label>
                             <Textarea
                                 placeholder="Describe your activity..."
                                 value={description}
                                 onChange={(e) => setDescription(e.target.value)}
-                                className="rounded-xl"
+                                className="rounded-xl bg-white text-black w-full min-h-[80px] sm:min-h-[100px]"
+                                rows={3}
                             />
                         </div>
-                        <div className="flex gap-2 justify-end">
-                            <Button variant="ghost" onClick={() => setShowLogForm(false)} className="rounded-xl">Cancel</Button>
-                            <Button type="submit" disabled={isSubmitting} className="rounded-xl">
+                        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-end gap-2 sm:gap-3">
+                            <Button 
+                                variant="ghost" 
+                                onClick={() => setShowLogForm(false)} 
+                                className="rounded-xl w-full sm:w-auto order-2 sm:order-1"
+                            >
+                                Cancel
+                            </Button>
+                            <Button 
+                                type="submit" 
+                                disabled={isSubmitting} 
+                                className="rounded-xl w-full sm:w-auto order-1 sm:order-2 bg-[#204ecf] hover:bg-[#1a3da8] text-white"
+                            >
                                 {isSubmitting ? 'Submitting...' : 'Submit Log'}
                             </Button>
                         </div>
@@ -313,7 +326,7 @@ const MilestoneSection = ({ projectId, currentUser, milestones, onRefresh }: any
                                     placeholder="e.g. MVP Launch"
                                     value={title}
                                     onChange={(e) => setTitle(e.target.value)}
-                                    className="rounded-xl"
+                                    className="rounded-xl bg-white text-black"
                                 />
                             </div>
                             <div className="space-y-2">
@@ -323,7 +336,7 @@ const MilestoneSection = ({ projectId, currentUser, milestones, onRefresh }: any
                                     placeholder="0.00"
                                     value={amount}
                                     onChange={(e) => setAmount(e.target.value)}
-                                    className="rounded-xl"
+                                    className="rounded-xl bg-white text-black"
                                 />
                             </div>
                         </div>
@@ -333,7 +346,7 @@ const MilestoneSection = ({ projectId, currentUser, milestones, onRefresh }: any
                                 placeholder="What needs to be finished?"
                                 value={description}
                                 onChange={(e) => setDescription(e.target.value)}
-                                className="rounded-xl"
+                                className="rounded-xl bg-white text-black"
                             />
                         </div>
                         <div className="flex gap-2 justify-end">

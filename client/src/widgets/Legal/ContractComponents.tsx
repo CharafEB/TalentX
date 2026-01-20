@@ -209,8 +209,8 @@ function CustomContractModal({ isOpen, onClose, contract, projectId, currentUser
                                     {contract ? contract.title : 'New Contract'}
                                 </h3>
                                 {contract && (
-                                    <Button variant="outline" size="sm" onClick={handleDownload} className="ml-4 rounded-xl">
-                                        <Download className="w-4 h-4 mr-2" />
+                                    <Button variant="outline" size="sm" onClick={handleDownload} className="ml-4 bg-white rounded-xl">
+                                        <Download className="w-4 h-4 mr-2 bg-white" />
                                         Download PDF
                                     </Button>
                                 )}
@@ -306,8 +306,8 @@ function CustomContractModal({ isOpen, onClose, contract, projectId, currentUser
                             )}
                         </div>
 
-                        <div className="p-6 border-t border-gray-100 flex justify-end gap-3 bg-gray-50/30">
-                            <Button variant="outline" onClick={onClose} className="rounded-xl px-6">
+                        <div className="p-6 border-t border-gray-100 flex flex-col lg:flex-row justify-end gap-3 ">
+                            <Button variant="outline" onClick={onClose} className="rounded-xl hidden lg:visible bg-white px-6">
                                 Close
                             </Button>
                             {!contract && (
@@ -335,6 +335,7 @@ function CustomContractModal({ isOpen, onClose, contract, projectId, currentUser
                                     >
                                         {signMutation.isPending ? 'Signing...' : 'Sign Agreement'}
                                     </Button>
+                                
                                 </div>
                             )}
                         </div>
@@ -379,7 +380,7 @@ export function ContractsList({ projectId, currentUser }: ContractsListProps) {
     return (
         <Card>
             <CardHeader className="flex flex-row items-center justify-between pb-2">
-                <CardTitle className="text-lg font-medium">Contracts & Agreements</CardTitle>
+                <CardTitle className="text-lg font-medium text-black">Contracts & Agreements</CardTitle>
                 {(currentUser.role === 'client' || currentUser.role === 'admin') && (
                     <Button size="sm" onClick={() => setIsCreateModalOpen(true)}>
                         <FileText className="w-4 h-4 mr-2" />

@@ -686,7 +686,7 @@ export default function ProjectDetail({ user, project, onBack }: ProjectDetailPr
                         <ArrowLeft className="w-5 h-5" />
                     </Button>
                     <div>
-                        <h1 className="text-2xl font-bold text-[#1a1a2e]">{project.name}</h1>
+                        <h1 className="text-2xl font-bold text-black">{project.name}</h1>
                         <div className="flex items-center gap-2 text-sm text-gray-500 mt-1">
                             <span className={`inline-block w-2 h-2 rounded-full ${project.status === 'active' ? 'bg-green-500' :
                                 project.status === 'completed' ? 'bg-blue-500' : 'bg-yellow-500'

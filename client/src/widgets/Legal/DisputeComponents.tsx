@@ -40,12 +40,17 @@ export function DisputeModal({ isOpen, onClose, projectId, onDisputeCreated }: D
     return (
         <AnimatePresence>
             {isOpen && (
-                <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+                <motion.div
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    exit={{ opacity: 0 }}
+                    className="absolute top-0 left-0 w-full h-full bg-transparent backdrop-blur-xl z-[9999] flex items-center justify-center p-4"
+                >
                     <motion.div
                         initial={{ opacity: 0, scale: 0.95, y: 20 }}
                         animate={{ opacity: 1, scale: 1, y: 0 }}
                         exit={{ opacity: 0, scale: 0.95, y: 20 }}
-                        className="bg-white rounded-3xl shadow-2xl w-full max-w-lg overflow-hidden border border-red-100"
+                        className="bg-white rounded-3xl shadow-2xl w-full max-w-lg overflow-hidden"
                     >
                         <div className="p-6 border-b border-red-50 flex items-center justify-between bg-red-50/30">
                             <div className="flex items-center gap-3 text-red-600">
@@ -75,7 +80,7 @@ export function DisputeModal({ isOpen, onClose, projectId, onDisputeCreated }: D
                                         placeholder="e.g., Non-delivery of work, Unresponsive client"
                                         value={reason}
                                         onChange={(e) => setReason(e.target.value)}
-                                        className="w-full px-4 py-2 rounded-xl border border-gray-200 focus:ring-2 focus:ring-red-500 focus:border-transparent outline-none transition-all"
+                                        className="w-full text-black px-4 py-2 rounded-xl border border-gray-200 focus:ring-2 focus:ring-red-500 focus:border-transparent outline-none transition-all"
                                     />
                                 </div>
                                 <div>
@@ -85,27 +90,27 @@ export function DisputeModal({ isOpen, onClose, projectId, onDisputeCreated }: D
                                         rows={4}
                                         value={description}
                                         onChange={(e) => setDescription(e.target.value)}
-                                        className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-red-500 focus:border-transparent outline-none transition-all resize-none text-sm leading-relaxed"
+                                        className="w-full text-black px-4 py-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-red-500 focus:border-transparent outline-none transition-all resize-none text-sm leading-relaxed"
                                     />
                                 </div>
                             </div>
                         </div>
 
-                        <div className="p-6 border-t border-gray-100 flex justify-end gap-3 bg-gray-50/30">
-                            <Button variant="ghost" onClick={onClose} className="rounded-xl px-6">
+                        <div className="p-6 flex justify-end gap-3">
+                            <Button variant="ghost" onClick={onClose} className="rounded-xl px-6 bg-transparent hover:bg-gray-100 text-gray-700">
                                 Cancel
                             </Button>
                             <Button
                                 variant="destructive"
                                 onClick={handleSubmit}
                                 disabled={isSubmitting || !reason || !description}
-                                className="rounded-xl px-8 shadow-lg shadow-red-200"
+                                className="rounded-xl px-8 shadow-lg"
                             >
                                 {isSubmitting ? 'Submitting...' : 'File Dispute & Freeze Funds'}
                             </Button>
                         </div>
                     </motion.div>
-                </div>
+                </motion.div>
             )}
         </AnimatePresence>
     );
