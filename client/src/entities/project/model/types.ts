@@ -23,3 +23,14 @@ export interface Project {
     createdAt: string;
     updatedAt: string;
 }
+
+export type ProjectDetailTab = 
+    | 'overview' 
+    | 'tasks' 
+    | 'team' 
+    | 'files' 
+    | 'srs' 
+    | 'design' 
+    | 'whiteboard' 
+    | 'contracts' 
+    | 'work';
