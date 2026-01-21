@@ -36,8 +36,8 @@
   --card: #ffffff;
   --card-foreground: #020817;
 
-  --border: #e2e8f0;
-  --input: #e2e8f0;
+  --border: #c5d7f0;
+  --input: #c5d7f0;
   --ring: #204ecf;
 
   --radius: 0.5rem;
@@ -91,9 +91,10 @@
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-    /* Adjust other colors for dark mode if needed, but keeping light mode focus for style */
+    /* TEMPORARY: Force light theme colors until dark mode is fully implemented */
+    /* Using same values as light mode to prevent inconsistent styling */
+    --background: #ffffff;
+    --foreground: #1a1a2e;
   }
 }
 

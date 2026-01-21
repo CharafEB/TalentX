@@ -163,7 +163,7 @@ const TimeTrackingSection = ({ projectId, currentUser, logs, onRefresh }: any) =
                                         type="date"
                                         value={date}
                                         onChange={(e) => setDate(e.target.value)}
-                                        className="rounded-xl bg-white text-black w-full"
+                                        className="rounded-xl w-full"
                                     />
                                 </div>
                             </div>
@@ -175,7 +175,7 @@ const TimeTrackingSection = ({ projectId, currentUser, logs, onRefresh }: any) =
                                     placeholder="e.g. 4.5"
                                     value={hours}
                                     onChange={(e) => setHours(e.target.value)}
-                                    className="rounded-xl bg-white text-black w-full"
+                                    className="rounded-xl  w-full"
                                 />
                             </div>
                         </div>
@@ -185,7 +185,7 @@ const TimeTrackingSection = ({ projectId, currentUser, logs, onRefresh }: any) =
                                 placeholder="Describe your activity..."
                                 value={description}
                                 onChange={(e) => setDescription(e.target.value)}
-                                className="rounded-xl bg-white text-black w-full min-h-[80px] sm:min-h-[100px]"
+                                className="rounded-xl  w-full min-h-[80px] sm:min-h-[100px]"
                                 rows={3}
                             />
                         </div>
