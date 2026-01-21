@@ -357,7 +357,7 @@ function DashboardContent() {
     return (
       <div className="space-y-8">
         <div className="flex justify-between items-center">
-          <h1 className="text-2xl font-bold text-[#1a1a2e]">
+          <h1 className="text-[20px] sm:text-2xl font-bold text-[#1a1a2e]">
             Profile Overview
           </h1>
           <Button
@@ -561,28 +561,28 @@ function DashboardContent() {
           <div className="grid md:grid-cols-3 gap-8">
             {/* Profile Info Card */}
             <div className="md:col-span-2 bg-white p-8 rounded-2xl shadow-sm border border-gray-200">
-              <div className="flex items-center gap-6 mb-8">
+              <div className="flex items-start sm:items-center gap-6 mb-8">
                 <img
                   src={
                     user?.avatar_url ||
                     `https://ui-avatars.com/api/?name=${user?.full_name}&background=random`
                   }
                   alt={user?.full_name}
-                  className="w-24 h-24 rounded-2xl object-cover ring-4 ring-blue-50"
+                  className="w-20 h-20 sm:w-24 sm:h-24 rounded-2xl object-cover ring-4 ring-blue-50"
                 />
                 <div>
-                  <h2 className="text-2xl font-bold text-[#1a1a2e]">
+                  <h2 className="text-[20px] max-sm:leading-[20px] sm:text-2xl font-bold text-[#1a1a2e]">
                     {user?.full_name}
                   </h2>
-                  <p className="text-[#204ecf] font-semibold">
+                  <p className="text-[#204ecf] font-semibold mt-2">
                     {talentProfile?.title || "Professional Talent"}
                   </p>
-                  <div className="flex items-center gap-4 mt-2 text-sm text-gray-500 font-medium">
+                  <div className="flex  items-center gap-4 mt-4 sm:mt-2 text-sm text-gray-500 font-medium">
                     <span className="flex items-center gap-1">
                       <Clock className="w-4 h-4" /> $
                       {talentProfile?.hourly_rate || 0}/hr
                     </span>
-                    <span className="flex items-center gap-1">
+                    <span className="flex items-center gap-1 text-nowrap">
                       <Briefcase className="w-4 h-4" />{" "}
                       {talentProfile?.experience_years || 0} Years Exp
                     </span>
@@ -1993,7 +1993,7 @@ function DashboardContent() {
         >
           <TabsList className="flex gap-2 sm:gap-3 justify-start flex-wrap mb-6 sm:mb-8">
             {TALENT_DASHBOARD_TABS.map((tab) => (
-              <TabsTrigger key={tab.value} value={tab.value} className="text-xs sm:text-sm px-3 sm:px-4 py-2">
+              <TabsTrigger key={tab.value} value={tab.value} className="text-sm px-3 sm:px-4 py-2">
                 {tab.label}
               </TabsTrigger>
             ))}

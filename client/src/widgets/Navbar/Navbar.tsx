@@ -161,7 +161,7 @@ export default function Navbar() {
                         <Link href={isAuthenticated ? createPageUrl('Dashboard') : createPageUrl('Home')} className="flex items-center gap-2 group">
                             <span className="text-2xl font-bold text-[#1a1a2e] tracking-tight">TalentX</span>
                             {isCategoryPage && (
-                                <span className="text-2xl text-[#1a1a2e] tracking-tight flex items-center">
+                                <span className="text-2xl text-[#1a1a2e] tracking-tight flex items-center max-sm:text-[20px] ">
                                     <span className="mx-2 text-gray-300 font-light">/</span>
                                     <span>{currentCategoryLabel}</span>
                                 </span>
