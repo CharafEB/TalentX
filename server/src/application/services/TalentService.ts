@@ -2,7 +2,10 @@ import { ITalentRepository } from '../../domain/repositories/ITalentRepository';
 import { UpdateTalentDTO } from '../dtos/TalentDTO';
 
 export class TalentService {
-    constructor(private talentRepo: ITalentRepository) { }
+    private talentRepo: ITalentRepository;
+    constructor({ talentRepo }: { talentRepo: ITalentRepository }) {
+        this.talentRepo = talentRepo;
+    }
 
     private transformToDomain(talent: any) {
         if (!talent) return null;

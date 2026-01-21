@@ -3,10 +3,19 @@ import { INotificationRepository } from '../../domain/repositories/INotification
 import { CreateTaskDTO, UpdateTaskDTO } from '../dtos/TaskDTO';
 
 export class TaskService {
-    constructor(
-        private taskRepo: ITaskRepository,
-        private notificationRepo: INotificationRepository
-    ) { }
+    private taskRepo: ITaskRepository;
+    private notificationRepo: INotificationRepository;
+
+    constructor({
+        taskRepo,
+        notificationRepo
+    }: {
+        taskRepo: ITaskRepository,
+        notificationRepo: INotificationRepository
+    }) {
+        this.taskRepo = taskRepo;
+        this.notificationRepo = notificationRepo;
+    }
 
     async createTask(dto: CreateTaskDTO) {
         const taskData = {

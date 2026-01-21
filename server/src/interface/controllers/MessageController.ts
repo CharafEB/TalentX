@@ -4,7 +4,11 @@ import { CreateMessageSchema } from '../../application/dtos/MessageDTO';
 import { AuthRequest } from '../middleware/AuthMiddleware';
 
 export class MessageController {
-    constructor(private messageService: MessageService) { }
+    private messageService: MessageService;
+
+    constructor({ messageService }: { messageService: MessageService }) {
+        this.messageService = messageService;
+    }
 
     listMessages = async (req: AuthRequest, res: Response) => {
         try {

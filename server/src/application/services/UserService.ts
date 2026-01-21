@@ -4,10 +4,19 @@ import { AuditLogService } from './AuditLogService';
 import bcrypt from 'bcryptjs';
 
 export class UserService {
-    constructor(
-        private userRepo: IUserRepository,
-        private auditLogService: AuditLogService
-    ) { }
+    private userRepo: IUserRepository;
+    private auditLogService: AuditLogService;
+
+    constructor({
+        userRepo,
+        auditLogService
+    }: {
+        userRepo: IUserRepository,
+        auditLogService: AuditLogService
+    }) {
+        this.userRepo = userRepo;
+        this.auditLogService = auditLogService;
+    }
 
     async getAllUsers() {
         return this.userRepo.findAll();

@@ -3,7 +3,11 @@ import { HireRequestService } from '../../application/services/HireRequestServic
 import { CreateHireRequestSchema } from '../../application/dtos/HireRequestDTO';
 
 export class HireRequestController {
-    constructor(private hireRequestService: HireRequestService) { }
+    private hireRequestService: HireRequestService;
+
+    constructor({ hireRequestService }: { hireRequestService: HireRequestService }) {
+        this.hireRequestService = hireRequestService;
+    }
 
     createHireRequest = async (req: Request, res: Response) => {
         try {

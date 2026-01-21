@@ -1,7 +1,10 @@
 import { PrismaClient } from '@prisma/client';
 
 export class AuditLogService {
-    constructor(private prisma: PrismaClient) { }
+    private prisma: PrismaClient;
+    constructor({ prisma }: { prisma: PrismaClient }) {
+        this.prisma = prisma;
+    }
 
     async logAction(adminId: string | null, action: string, entityType: string, entityId?: string, details?: any) {
         try {

@@ -2,10 +2,19 @@ import { PrismaClient } from '@prisma/client';
 import { AuditLogService } from './AuditLogService';
 
 export class CMSService {
-    constructor(
-        private prisma: PrismaClient,
-        private auditLogService: AuditLogService
-    ) { }
+    private prisma: PrismaClient;
+    private auditLogService: AuditLogService;
+
+    constructor({
+        prisma,
+        auditLogService
+    }: {
+        prisma: PrismaClient,
+        auditLogService: AuditLogService
+    }) {
+        this.prisma = prisma;
+        this.auditLogService = auditLogService;
+    }
 
     // FAQs
     async listFAQs() { return this.prisma.fAQ.findMany({ orderBy: { createdAt: 'desc' } }); }

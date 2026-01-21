@@ -6,13 +6,31 @@ import { IProjectRepository } from '../../domain/repositories/IProjectRepository
 import { CreateHireRequestDTO } from '../dtos/HireRequestDTO';
 
 export class HireRequestService {
-    constructor(
-        private hireRequestRepo: IHireRequestRepository,
-        private notificationRepo: INotificationRepository,
-        private talentRepo: ITalentRepository,
-        private agencyRepo: IAgencyRepository,
-        private projectRepo: IProjectRepository
-    ) { }
+    private hireRequestRepo: IHireRequestRepository;
+    private notificationRepo: INotificationRepository;
+    private talentRepo: ITalentRepository;
+    private agencyRepo: IAgencyRepository;
+    private projectRepo: IProjectRepository;
+
+    constructor({
+        hireRequestRepo,
+        notificationRepo,
+        talentRepo,
+        agencyRepo,
+        projectRepo
+    }: {
+        hireRequestRepo: IHireRequestRepository,
+        notificationRepo: INotificationRepository,
+        talentRepo: ITalentRepository,
+        agencyRepo: IAgencyRepository,
+        projectRepo: IProjectRepository
+    }) {
+        this.hireRequestRepo = hireRequestRepo;
+        this.notificationRepo = notificationRepo;
+        this.talentRepo = talentRepo;
+        this.agencyRepo = agencyRepo;
+        this.projectRepo = projectRepo;
+    }
 
     async createHireRequest(dto: CreateHireRequestDTO) {
         // Parse metadata

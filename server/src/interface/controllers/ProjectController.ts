@@ -4,7 +4,11 @@ import { CreateProjectSchema, UpdateProjectSchema, RecordPaymentSchema, Complete
 import { AuthRequest } from '../middleware/AuthMiddleware';
 
 export class ProjectController {
-    constructor(private projectService: ProjectService) { }
+    private projectService: ProjectService;
+
+    constructor({ projectService }: { projectService: ProjectService }) {
+        this.projectService = projectService;
+    }
 
     createProject = async (req: AuthRequest, res: Response) => {
         try {

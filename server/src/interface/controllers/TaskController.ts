@@ -4,7 +4,11 @@ import { CreateTaskSchema, UpdateTaskSchema } from '../../application/dtos/TaskD
 import { AuthRequest } from '../middleware/AuthMiddleware';
 
 export class TaskController {
-    constructor(private taskService: TaskService) { }
+    private taskService: TaskService;
+
+    constructor({ taskService }: { taskService: TaskService }) {
+        this.taskService = taskService;
+    }
 
     createTask = async (req: AuthRequest, res: Response) => {
         try {

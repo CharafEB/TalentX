@@ -2,7 +2,11 @@ import { PrismaClient, TimeLog } from '@prisma/client';
 import { ITimeLogRepository } from '../../domain/repositories/ITimeLogRepository';
 
 export class PrismaTimeLogRepository implements ITimeLogRepository {
-    constructor(private prisma: PrismaClient) { }
+    private prisma: PrismaClient;
+
+    constructor({ prisma }: { prisma: PrismaClient }) {
+        this.prisma = prisma;
+    }
 
     async create(data: any): Promise<TimeLog> {
         return this.prisma.timeLog.create({ data });

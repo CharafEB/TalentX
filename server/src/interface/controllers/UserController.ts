@@ -4,7 +4,11 @@ import { UpdateUserSchema } from '../../application/dtos/UserDTO';
 import { AuthRequest } from '../middleware/AuthMiddleware';
 
 export class UserController {
-    constructor(private userService: UserService) { }
+    private userService: UserService;
+
+    constructor({ userService }: { userService: UserService }) {
+        this.userService = userService;
+    }
 
     getAllUsers = async (req: Request, res: Response) => {
         try {

@@ -1,9 +1,14 @@
-import { prisma } from './prisma';
+import { PrismaClient } from '@prisma/client';
 import { INotificationRepository, NotificationData } from '../../domain/repositories/INotificationRepository';
 
 export class PrismaNotificationRepository implements INotificationRepository {
+    private prisma: PrismaClient;
+
+    constructor({ prisma }: { prisma: PrismaClient }) {
+        this.prisma = prisma;
+    }
     async create(data: NotificationData): Promise<void> {
-        await prisma.notification.create({
+        await this.prisma.notification.create({
             data: {
                 type: data.type,
                 content: data.content,
@@ -16,14 +21,14 @@ export class PrismaNotificationRepository implements INotificationRepository {
     }
 
     async findByUserId(userId: string): Promise<any[]> {
-        return prisma.notification.findMany({
+        return this.prisma.notification.findMany({
             where: { userId },
             orderBy: { createdAt: 'desc' }
         });
     }
 
     async markAsRead(id: string): Promise<void> {
-        await prisma.notification.update({
+        await this.prisma.notification.update({
             where: { id },
             data: { isRead: true }
         });

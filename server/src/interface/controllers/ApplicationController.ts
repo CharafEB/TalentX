@@ -3,7 +3,11 @@ import { CreateApplicationSchema } from '../../application/dtos/ApplicationDTO';
 import { ApplicationService } from '../../application/services/ApplicationService';
 
 export class ApplicationController {
-    constructor(private applicationService: ApplicationService) { }
+    private applicationService: ApplicationService;
+
+    constructor({ applicationService }: { applicationService: ApplicationService }) {
+        this.applicationService = applicationService;
+    }
 
     submitApplication = async (req: Request, res: Response) => {
         try {

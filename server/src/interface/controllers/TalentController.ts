@@ -3,7 +3,11 @@ import { TalentService } from '../../application/services/TalentService';
 import { UpdateTalentSchema } from '../../application/dtos/TalentDTO';
 
 export class TalentController {
-    constructor(private talentService: TalentService) { }
+    private talentService: TalentService;
+
+    constructor({ talentService }: { talentService: TalentService }) {
+        this.talentService = talentService;
+    }
 
     getAllTalents = async (req: Request, res: Response) => {
         try {

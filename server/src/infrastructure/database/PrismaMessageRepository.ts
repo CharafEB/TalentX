@@ -1,9 +1,14 @@
-import { prisma } from './prisma';
+import { PrismaClient } from '@prisma/client';
 import { IMessageRepository } from '../../domain/repositories/IMessageRepository';
 
 export class PrismaMessageRepository implements IMessageRepository {
+    private prisma: PrismaClient;
+
+    constructor({ prisma }: { prisma: PrismaClient }) {
+        this.prisma = prisma;
+    }
     async create(data: any): Promise<any> {
-        return prisma.message.create({
+        return this.prisma.message.create({
             data,
             include: {
                 sender: {
@@ -18,7 +23,7 @@ export class PrismaMessageRepository implements IMessageRepository {
     }
 
     async findSupportThreads(supportId: string): Promise<any[]> {
-        return prisma.message.findMany({
+        return this.prisma.message.findMany({
             where: { receiverId: supportId },
             distinct: ["senderId"],
             include: { sender: true },
@@ -30,7 +35,7 @@ export class PrismaMessageRepository implements IMessageRepository {
     }
 
     async findSupportMessages(userId: string, supportId: string): Promise<any[]> {
-        return prisma.message.findMany({
+        return this.prisma.message.findMany({
             where: {
                 OR: [
                     { senderId: userId, receiverId: supportId },
@@ -43,7 +48,7 @@ export class PrismaMessageRepository implements IMessageRepository {
     }
 
     async findDirectMessages(userId: string, receiverId: string): Promise<any[]> {
-        return prisma.message.findMany({
+        return this.prisma.message.findMany({
             where: {
                 OR: [
                     { senderId: userId, receiverId: receiverId },
@@ -57,7 +62,7 @@ export class PrismaMessageRepository implements IMessageRepository {
 
     async countUnread(userId: string, supportId: string): Promise<{ general: number, support: number }> {
         // General: receiver is user, sender NOT support
-        const general = await prisma.message.count({
+        const general = await this.prisma.message.count({
             where: {
                 receiverId: userId,
                 read: false,
@@ -69,7 +74,7 @@ export class PrismaMessageRepository implements IMessageRepository {
         });
 
         // Support: receiver is user, sender IS support
-        const support = await prisma.message.count({
+        const support = await this.prisma.message.count({
             where: {
                 receiverId: userId,
                 read: false,
@@ -85,7 +90,7 @@ export class PrismaMessageRepository implements IMessageRepository {
         // Legacy logic for admin unread:
         // supportCount = receiver is supportId, read: false, sender NOT supportId (basically users messaging support)
 
-        const support = await prisma.message.count({
+        const support = await this.prisma.message.count({
             where: {
                 receiverId: supportId,
                 read: false,
@@ -97,7 +102,7 @@ export class PrismaMessageRepository implements IMessageRepository {
         // Legacy getUnreadCount has 2 promises.
         // For admin:
         // 1. General (legacy line 78): receiverId = userData.id (admin's id). 
-        const general = await prisma.message.count({
+        const general = await this.prisma.message.count({
             where: {
                 receiverId: "admin-id-placeholder", // We need admin's real ID passed to method
                 // Wait, legacy passes userData.id.
@@ -114,7 +119,7 @@ export class PrismaMessageRepository implements IMessageRepository {
     async countUnreadLegacy(userId: string, supportId: string, isAdmin: boolean): Promise<{ general: number, support: number }> {
         const [general, support] = await Promise.all([
             // General messages (exclude support flows)
-            prisma.message.count({
+            this.prisma.message.count({
                 where: {
                     receiverId: userId,
                     read: false,
@@ -125,7 +130,7 @@ export class PrismaMessageRepository implements IMessageRepository {
                 },
             }),
             // Support messages
-            prisma.message.count({
+            this.prisma.message.count({
                 where: {
                     receiverId: isAdmin ? supportId : userId,
                     read: false,
@@ -138,14 +143,14 @@ export class PrismaMessageRepository implements IMessageRepository {
 
 
     async updateReadStatus(where: any): Promise<void> {
-        await prisma.message.updateMany({
+        await this.prisma.message.updateMany({
             where,
             data: { read: true }
         });
     }
 
     async deleteOldMessages(olderThan: Date, supportId: string): Promise<number> {
-        const result = await prisma.message.deleteMany({
+        const result = await this.prisma.message.deleteMany({
             where: {
                 OR: [
                     { receiverId: supportId },

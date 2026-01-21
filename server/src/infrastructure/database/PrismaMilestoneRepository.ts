@@ -2,7 +2,11 @@ import { PrismaClient, Milestone } from '@prisma/client';
 import { IMilestoneRepository } from '../../domain/repositories/IMilestoneRepository';
 
 export class PrismaMilestoneRepository implements IMilestoneRepository {
-    constructor(private prisma: PrismaClient) { }
+    private prisma: PrismaClient;
+
+    constructor({ prisma }: { prisma: PrismaClient }) {
+        this.prisma = prisma;
+    }
 
     async create(data: any): Promise<Milestone> {
         return this.prisma.milestone.create({ data });

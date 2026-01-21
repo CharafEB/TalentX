@@ -6,11 +6,23 @@ import { CreateMessageDTO } from '../dtos/MessageDTO';
 export class MessageService {
     private static SUPPORT_ID = "support-system-user-id-001";
 
-    constructor(
-        private messageRepo: IMessageRepository,
-        private notificationRepo: INotificationRepository,
-        private userRepo: IUserRepository // To find admins for notifications
-    ) { }
+    private messageRepo: IMessageRepository;
+    private notificationRepo: INotificationRepository;
+    private userRepo: IUserRepository;
+
+    constructor({
+        messageRepo,
+        notificationRepo,
+        userRepo
+    }: {
+        messageRepo: IMessageRepository,
+        notificationRepo: INotificationRepository,
+        userRepo: IUserRepository
+    }) {
+        this.messageRepo = messageRepo;
+        this.notificationRepo = notificationRepo;
+        this.userRepo = userRepo;
+    }
 
     private formatMessage(m: any) {
         return {

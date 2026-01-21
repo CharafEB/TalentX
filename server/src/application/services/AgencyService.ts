@@ -2,7 +2,10 @@ import { IAgencyRepository } from '../../domain/repositories/IAgencyRepository';
 import { UpdateAgencyDTO } from '../dtos/AgencyDTO';
 
 export class AgencyService {
-    constructor(private agencyRepo: IAgencyRepository) { }
+    private agencyRepo: IAgencyRepository;
+    constructor({ agencyRepo }: { agencyRepo: IAgencyRepository }) {
+        this.agencyRepo = agencyRepo;
+    }
 
     private transformToDomain(agency: any) {
         if (!agency) return null;

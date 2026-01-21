@@ -4,10 +4,19 @@ import { IProjectRepository } from '../../domain/repositories/IProjectRepository
 import { Dispute } from '@prisma/client';
 
 export class DisputeService {
-    constructor(
-        private disputeRepo: IDisputeRepository,
-        private projectRepo: IProjectRepository
-    ) { }
+    private disputeRepo: IDisputeRepository;
+    private projectRepo: IProjectRepository;
+
+    constructor({
+        disputeRepo,
+        projectRepo
+    }: {
+        disputeRepo: IDisputeRepository,
+        projectRepo: IProjectRepository
+    }) {
+        this.disputeRepo = disputeRepo;
+        this.projectRepo = projectRepo;
+    }
 
     async createDispute(userId: string, data: any): Promise<Dispute> {
         // 1. Create Dispute

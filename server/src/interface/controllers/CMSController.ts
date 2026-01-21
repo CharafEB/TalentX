@@ -3,7 +3,11 @@ import { CMSService } from '../../application/services/CMSService';
 import { AuthRequest } from '../middleware/AuthMiddleware';
 
 export class CMSController {
-    constructor(private cmsService: CMSService) { }
+    private cmsService: CMSService;
+
+    constructor({ cmsService }: { cmsService: CMSService }) {
+        this.cmsService = cmsService;
+    }
 
     // FAQs
     async listFAQs(req: Request, res: Response) {
