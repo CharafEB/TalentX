@@ -102,7 +102,7 @@ const KanbanBoard: React.FC<KanbanBoardProps> = ({ tasks, onTaskClick, onUpdateS
                     </div>
 
                     <div
-                        className={`space-y-3 rounded-lg p-2 min-h-[400px] transition-colors ${
+                        className={`space-y-3 rounded-lg p-2 ${optimisticTasks?.filter(t => t.status === col.id).length > 0 ? 'min-h-[400px]' : ''} transition-colors ${
                             dragOverColumn === col.id
                                 ? 'bg-blue-50 border-2 border-dashed border-blue-400'
                                 : 'bg-gray-50'

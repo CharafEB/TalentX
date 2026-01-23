@@ -1115,7 +1115,8 @@ export default function AdminDashboard() {
                                 <Button onClick={() => refetchProjects()} variant="default" size="sm">Refresh</Button>
                             </CardHeader>
                             <CardContent>
-                                <Table>
+                                <div className="overflow-y-auto max-h-96">
+                                    <Table>
                                     <TableHeader>
                                         <TableRow>
                                             <TableHead>Project Name</TableHead>
@@ -1219,6 +1220,7 @@ export default function AdminDashboard() {
                                         )}
                                     </TableBody>
                                 </Table>
+                                </div>
                             </CardContent>
                         </Card>
                     </TabsContent>

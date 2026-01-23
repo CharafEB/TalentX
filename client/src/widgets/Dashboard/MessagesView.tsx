@@ -109,8 +109,10 @@ export const MessagesView = ({ user, initialShowSupport = false }: MessagesViewP
     });
 
     return (
+      
         <div className="bg-white rounded-2xl shadow-sm border border-gray-200 h-[600px] flex flex-col overflow-hidden">
             <div className="p-4 border-b border-gray-200 flex items-center justify-between bg-gray-50/50">
+            
                 <div className="flex items-center gap-3">
                     <div className="relative">
                         <MessageSquare className="w-5 h-5 text-[#204ecf]" />

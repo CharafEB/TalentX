@@ -436,24 +436,24 @@ export default function ProjectDetail({ user, project, onBack }: ProjectDetailPr
         <div className="space-y-8">
             {/* Primary Assignee */}
             {project.assigned_to && (
-                <div className="bg-gradient-to-r from-gray-50 to-white p-8 rounded-2xl border border-gray-200 shadow-sm">
-                    <div className="flex items-center justify-between mb-6">
+                <div className="bg-gradient-to-r from-gray-50 to-white p-4 sm:p-8 rounded-2xl border border-gray-200 shadow-sm">
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
                         <h3 className="font-bold text-lg text-[#1a1a2e] flex items-center gap-2">
                             Primary Engagement: <span className="text-[#204ecf] capitalize">{project.assigned_to.type}</span>
                         </h3>
-                        <Button variant="outline" size="sm" onClick={() => setActiveTab('overview')}>
+                        <Button variant="outline" size="sm" onClick={() => setActiveTab('overview')} className="w-full sm:w-auto">
                             Engagement Terms
                         </Button>
                     </div>
-                    <div className="flex items-center gap-6">
+                    <div className="flex flex-col sm:flex-row items-center gap-4 sm:gap-6">
                         <img
                             src={project.assigned_to.image_url || `https://ui-avatars.com/api/?name=${encodeURIComponent(project.assigned_to.name)}&background=random`}
                             alt={project.assigned_to.name}
-                            className="w-20 h-20 rounded-2xl shadow-md border-4 border-white object-cover"
+                            className="w-16 h-16 sm:w-20 sm:h-20 rounded-2xl shadow-md border-4 border-white object-cover"
                         />
-                        <div className="flex-1">
-                            <h4 className="text-xl font-bold text-[#1a1a2e]">{project.assigned_to.name}</h4>
-                            <div className="flex items-center gap-4 mt-1 text-sm text-gray-500">
+                        <div className="flex-1 text-center sm:text-left">
+                            <h4 className="text-lg sm:text-xl font-bold text-[#1a1a2e]">{project.assigned_to.name}</h4>
+                            <div className="flex flex-col sm:flex-row items-center gap-2 sm:gap-4 mt-1 text-sm text-gray-500">
                                 <span className="flex items-center gap-1">
                                     <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" /> 5.0 Rating
                                 </span>
@@ -462,8 +462,8 @@ export default function ProjectDetail({ user, project, onBack }: ProjectDetailPr
                                 </span>
                             </div>
                         </div>
-                        <div className="flex gap-2">
-                            <Button className="bg-[#204ecf] hover:bg-[#1a3da8] text-white rounded-xl">
+                        <div className="w-full sm:w-auto flex flex-col sm:flex-row gap-2">
+                            <Button className="bg-[#204ecf] hover:bg-[#1a3da8] text-white rounded-xl w-full sm:w-auto">
                                 <MessageSquare className="w-4 h-4 mr-2" /> Message
                             </Button>
                         </div>
@@ -471,88 +471,172 @@ export default function ProjectDetail({ user, project, onBack }: ProjectDetailPr
                 </div>
             )}
 
-            <div className="grid md:grid-cols-2 gap-6">
-                {project.team_members?.map((member) => (
-                    <div key={member.id} className="bg-white p-6 rounded-2xl border border-gray-200 shadow-sm flex items-center gap-4">
-                        <img
-                            src={member.avatar_url || `https://ui-avatars.com/api/?name=${member.full_name}`}
-                            alt={member.full_name}
-                            className="w-16 h-16 rounded-full"
-                        />
-                        <div className="flex-1">
-                            <div className="flex items-center gap-2">
-                                <h3 className="font-bold text-[#1a1a2e]">{member.full_name}</h3>
-                                {member.rateAmount && (
-                                    <span className="text-[10px] bg-green-50 text-green-700 px-2 py-0.5 rounded-full font-bold">
-                                        ${member.rateAmount}/{member.rateType === 'hourly' ? 'hr' : 'mo'}
-                                    </span>
-                                )}
+            <div className="sm:hidden overflow-x-auto -mx-4 px-4">
+                <div className="grid grid-cols-1 gap-4 min-w-[320px]">
+                    {project.team_members?.map((member) => (
+                        <div key={member.id} className="bg-white p-4 rounded-2xl border border-gray-200 shadow-sm">
+                            <div className="flex items-center gap-3 sm:gap-4">
+                                <img
+                                    src={member.avatar_url || `https://ui-avatars.com/api/?name=${member.full_name}`}
+                                    alt={member.full_name}
+                                    className="w-12 h-12 sm:w-16 sm:h-16 rounded-full flex-shrink-0"
+                                />
+                                <div className="flex-1 min-w-0">
+                                    <div className="flex flex-col sm:flex-row sm:items-center gap-2">
+                                        <h3 className="font-bold text-[#1a1a2e] truncate">{member.full_name}</h3>
+                                        {member.rateAmount && (
+                                            <span className="text-[10px] bg-green-50 text-green-700 px-2 py-0.5 rounded-full font-bold whitespace-nowrap">
+                                                ${member.rateAmount}/{member.rateType === 'hourly' ? 'hr' : 'mo'}
+                                            </span>
+                                        )}
+                                    </div>
+                                    <p className="text-sm text-gray-500 capitalize">{member.role}</p>
+                                </div>
                             </div>
-                            <p className="text-sm text-gray-500 capitalize">{member.role}</p>
-                        </div>
-                        <div className="flex gap-2">
-                            {isClientOrAdmin && (
-                                <Button
-                                    variant="outline"
-                                    size="sm"
-                                    className="hidden sm:flex gap-1 items-center hover:bg-green-50 hover:text-green-700 hover:border-green-200 transition-colors"
-                                    onClick={async () => {
-                                        try {
-                                            await talentXApi.entities.Project.recordPayment({
-                                                projectId: project.id,
-                                                talentId: member.id,
-                                                amount: member.rateType === 'monthly' ? (member.rateAmount || 0) : (member.rateAmount || 0) * 160
-                                            });
-                                            toast.success(`Payment notification sent for ${member.full_name}`);
-                                        } catch (error) {
-                                            toast.error('Failed to send payment notification');
-                                        }
-                                    }}
-                                >
-                                    <DollarSign className="w-3 h-3" /> Pay
+                            <div className="flex flex-col sm:flex-row w-full items-center gap-2 mt-4">
+                                {isClientOrAdmin && (
+                                    <Button
+                                        variant="outline"
+                                        size="sm"
+                                        className="flex gap-2 items-center hover:bg-green-50 hover:text-green-700 hover:border-green-200 transition-colors w-full sm:w-auto justify-center"
+                                        onClick={async () => {
+                                            try {
+                                                await talentXApi.entities.Project.recordPayment({
+                                                    projectId: project.id,
+                                                    talentId: member.id,
+                                                    amount: member.rateType === 'monthly' ? (member.rateAmount || 0) : (member.rateAmount || 0) * 160
+                                                });
+                                                toast.success(`Payment notification sent for ${member.full_name}`);
+                                            } catch (error) {
+                                                toast.error('Failed to send payment notification');
+                                            }
+                                        }}
+                                    >
+                                        <DollarSign className="w-4 h-4" /> Pay
+                                    </Button>
+                                )}
+                                <Button variant="outline" size="sm" className="w-full sm:w-auto justify-center">
+                                    <MessageSquare className="w-4 h-4" />
                                 </Button>
-                            )}
-                            <Button variant="outline" size="icon">
-                                <MessageSquare className="w-4 h-4" />
-                            </Button>
+                            </div>
                         </div>
-                    </div>
-                ))}
+                    ))}
+                </div>
+            </div>
+            
+            {/* Desktop View */}
+            <div className="hidden sm:block">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 gap-4 sm:gap-6">
+                    {project.team_members?.map((member) => (
+                        <div key={member.id} className="bg-white p-4 sm:p-6 rounded-2xl border border-gray-200 shadow-sm">
+                            <div className="flex items-center gap-3 sm:gap-4">
+                                <img
+                                    src={member.avatar_url || `https://ui-avatars.com/api/?name=${member.full_name}`}
+                                    alt={member.full_name}
+                                    className="w-12 h-12 sm:w-16 sm:h-16 rounded-full flex-shrink-0"
+                                />
+                                <div className="flex-1 min-w-0">
+                                    <div className="flex flex-col sm:flex-row sm:items-center gap-2">
+                                        <h3 className="font-bold text-[#1a1a2e] truncate">{member.full_name}</h3>
+                                        {member.rateAmount && (
+                                            <span className="text-[10px] bg-green-50 text-green-700 px-2 py-0.5 rounded-full font-bold whitespace-nowrap">
+                                                ${member.rateAmount}/{member.rateType === 'hourly' ? 'hr' : 'mo'}
+                                            </span>
+                                        )}
+                                    </div>
+                                    <p className="text-sm text-gray-500 capitalize">{member.role}</p>
+                                </div>
+                            </div>
+                            <div className="flex flex-col sm:flex-row w-full items-center gap-2 mt-4">
+                                {isClientOrAdmin && (
+                                    <Button
+                                        variant="outline"
+                                        size="sm"
+                                        className="flex gap-2 items-center hover:bg-green-50 hover:text-green-700 hover:border-green-200 transition-colors w-full sm:w-auto justify-center"
+                                        onClick={async () => {
+                                            try {
+                                                await talentXApi.entities.Project.recordPayment({
+                                                    projectId: project.id,
+                                                    talentId: member.id,
+                                                    amount: member.rateType === 'monthly' ? (member.rateAmount || 0) : (member.rateAmount || 0) * 160
+                                                });
+                                                toast.success(`Payment notification sent for ${member.full_name}`);
+                                            } catch (error) {
+                                                toast.error('Failed to send payment notification');
+                                            }
+                                        }}
+                                    >
+                                        <DollarSign className="w-4 h-4" /> Pay
+                                    </Button>
+                                )}
+                                <Button variant="outline" size="sm" className="w-full sm:w-auto justify-center">
+                                    <MessageSquare className="w-4 h-4" />
+                                </Button>
+                            </div>
+                        </div>
+                    ))}
+                </div>
             </div>
         </div>
     );
 
     const FilesTab = () => (
         <div className="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
-            <table className="w-full">
-                <thead className="bg-gray-50">
+            <div className="overflow-y-auto max-h-96">
+                {/* Mobile Card View */}
+                <div className="sm:hidden">
+                    {[1, 2, 3].map((_, i) => (
+                        <div key={i} className="p-4 border-b border-gray-100 last:border-b-0">
+                            <div className="flex items-start justify-between mb-2">
+                                <div className="flex items-center gap-2 flex-1 min-w-0">
+                                    <FileText className="w-4 h-4 text-gray-400 flex-shrink-0" />
+                                    <span className="text-sm font-medium text-gray-900 truncate">Project_Specs_v{i + 1}.pdf</span>
+                                </div>
+                                <Button variant="ghost" size="icon" className="h-8 w-8 flex-shrink-0">
+                                    <MoreHorizontal className="w-4 h-4" />
+                                </Button>
+                            </div>
+                            <div className="flex items-center gap-4 text-xs text-gray-500">
+                                <span>2.4 MB</span>
+                                <span>Michael Torres</span>
+                            </div>
+                        </div>
+                    ))}
+                </div>
+                
+                {/* Desktop Table View */}
+                <div className="hidden sm:block">
+                    <table className="w-full">
+                <thead className="bg-gray-50 sticky top-0 z-10">
                     <tr>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Size</th>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Uploaded By</th>
-                        <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                        <th className="px-2 sm:px-4 py-2 text-left text-[10px] sm:text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th>
+                        <th className="px-2 sm:px-4 py-2 text-left text-[10px] sm:text-xs font-medium text-gray-500 uppercase tracking-wider">Size</th>
+                        <th className="px-2 sm:px-4 py-2 text-left text-[10px] sm:text-xs font-medium text-gray-500 uppercase tracking-wider">Uploaded By</th>
+                        <th className="px-2 sm:px-4 py-2 text-right text-[10px] sm:text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
                     </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-200">
                     {[1, 2, 3].map((_, i) => (
                         <tr key={i}>
-                            <td className="px-6 py-4 whitespace-nowrap">
-                                <div className="flex items-center gap-3">
-                                    <FileText className="w-5 h-5 text-gray-400" />
-                                    <span className="text-sm font-medium text-gray-900">Project_Specs_v{i + 1}.pdf</span>
+                            <td className="px-2 sm:px-4 py-2 sm:py-3 whitespace-nowrap">
+                                <div className="flex items-center gap-1 sm:gap-3">
+                                    <FileText className="w-3 h-3 sm:w-5 sm:h-5 text-gray-400 flex-shrink-0" />
+                                    <span className="text-[10px] sm:text-sm font-medium text-gray-900 truncate max-w-[80px] sm:max-w-[150px] lg:max-w-none">Project_Specs_v{i + 1}.pdf</span>
                                 </div>
                             </td>
-                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">2.4 MB</td>
-                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">Michael Torres</td>
-                            <td className="px-6 py-4 whitespace-nowrap text-right">
-                                <Button variant="ghost" size="icon" className="h-8 w-8">
-                                    <MoreHorizontal className="w-4 h-4" />
+                            <td className="px-2 sm:px-4 py-2 sm:py-3 whitespace-nowrap text-[10px] sm:text-sm text-gray-500">2.4 MB</td>
+                            <td className="px-2 sm:px-4 py-2 sm:py-3 whitespace-nowrap text-[10px] sm:text-sm text-gray-500 truncate max-w-[60px] sm:max-w-none">M. Torres</td>
+                            <td className="px-2 sm:px-4 py-2 sm:py-3 whitespace-nowrap text-right">
+                                <Button variant="ghost" size="icon" className="h-5 w-5 sm:h-8 sm:w-8 p-0 sm:p-1">
+                                    <MoreHorizontal className="w-2.5 h-2.5 sm:w-4 sm:h-4" />
                                 </Button>
                             </td>
                         </tr>
                     ))}
                 </tbody>
             </table>
+                </div>
+            </div>
         </div>
     );
 
@@ -667,7 +751,19 @@ export default function ProjectDetail({ user, project, onBack }: ProjectDetailPr
     );
 
     const ContractsTab = () => (
-        <ContractsList projectId={project.id} currentUser={user} />
+        <>
+            {/* Mobile View */}
+            <div className="sm:hidden overflow-x-auto -mx-4 px-4">
+                <div className="min-w-[320px]">
+                    <ContractsList projectId={project.id} currentUser={user} />
+                </div>
+            </div>
+            
+            {/* Desktop View */}
+            <div className="hidden sm:block">
+                <ContractsList projectId={project.id} currentUser={user} />
+            </div>
+        </>
     );
 
     return (
