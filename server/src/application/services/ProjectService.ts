@@ -5,12 +5,27 @@ import { CreateProjectDTO, UpdateProjectDTO, RecordPaymentDTO } from '../dtos/Pr
 import { AuditLogService } from './AuditLogService';
 
 export class ProjectService {
-    constructor(
-        private projectRepo: IProjectRepository,
-        private notificationRepo: INotificationRepository,
-        private talentRepo: ITalentRepository,
-        private auditLogService: AuditLogService
-    ) { }
+    private projectRepo: IProjectRepository;
+    private notificationRepo: INotificationRepository;
+    private talentRepo: ITalentRepository;
+    private auditLogService: AuditLogService;
+
+    constructor({
+        projectRepo,
+        notificationRepo,
+        talentRepo,
+        auditLogService
+    }: {
+        projectRepo: IProjectRepository,
+        notificationRepo: INotificationRepository,
+        talentRepo: ITalentRepository,
+        auditLogService: AuditLogService
+    }) {
+        this.projectRepo = projectRepo;
+        this.notificationRepo = notificationRepo;
+        this.talentRepo = talentRepo;
+        this.auditLogService = auditLogService;
+    }
 
     // Helper to format project response to match legacy structure
     private transformToDomain(project: any) {

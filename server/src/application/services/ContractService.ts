@@ -6,13 +6,31 @@ import { INotificationRepository } from '../../domain/repositories/INotification
 import { Contract } from '@prisma/client';
 
 export class ContractService {
-    constructor(
-        private contractRepo: IContractRepository,
-        private talentRepo: ITalentRepository,
-        private agencyRepo: IAgencyRepository,
-        private projectRepo: IProjectRepository,
-        private notificationRepo: INotificationRepository
-    ) { }
+    private contractRepo: IContractRepository;
+    private talentRepo: ITalentRepository;
+    private agencyRepo: IAgencyRepository;
+    private projectRepo: IProjectRepository;
+    private notificationRepo: INotificationRepository;
+
+    constructor({
+        contractRepo,
+        talentRepo,
+        agencyRepo,
+        projectRepo,
+        notificationRepo
+    }: {
+        contractRepo: IContractRepository,
+        talentRepo: ITalentRepository,
+        agencyRepo: IAgencyRepository,
+        projectRepo: IProjectRepository,
+        notificationRepo: INotificationRepository
+    }) {
+        this.contractRepo = contractRepo;
+        this.talentRepo = talentRepo;
+        this.agencyRepo = agencyRepo;
+        this.projectRepo = projectRepo;
+        this.notificationRepo = notificationRepo;
+    }
 
     async createContract(userId: string, data: any): Promise<Contract> {
         // Auto-link talent/agency from project if not provided

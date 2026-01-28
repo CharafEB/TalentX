@@ -3,7 +3,11 @@ import { NotificationService } from '../../application/services/NotificationServ
 import { AuthRequest } from '../middleware/AuthMiddleware';
 
 export class NotificationController {
-    constructor(private notificationService: NotificationService) { }
+    private notificationService: NotificationService;
+
+    constructor({ notificationService }: { notificationService: NotificationService }) {
+        this.notificationService = notificationService;
+    }
 
     listNotifications = async (req: Request, res: Response) => {
         try {

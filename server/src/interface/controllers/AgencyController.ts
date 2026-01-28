@@ -3,7 +3,11 @@ import { AgencyService } from '../../application/services/AgencyService';
 import { UpdateAgencySchema } from '../../application/dtos/AgencyDTO';
 
 export class AgencyController {
-    constructor(private agencyService: AgencyService) { }
+    private agencyService: AgencyService;
+
+    constructor({ agencyService }: { agencyService: AgencyService }) {
+        this.agencyService = agencyService;
+    }
 
     getAllAgencies = async (req: Request, res: Response) => {
         try {

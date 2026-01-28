@@ -4,11 +4,23 @@ import { ITalentRepository } from '../../domain/repositories/ITalentRepository';
 import { GenerateTeamDTO, HireTeamDTO } from '../dtos/TeamDTO';
 
 export class TeamService {
-    constructor(
-        private teamRepo: ITeamRepository,
-        private projectRepo: IProjectRepository,
-        private talentRepo: ITalentRepository
-    ) { }
+    private teamRepo: ITeamRepository;
+    private projectRepo: IProjectRepository;
+    private talentRepo: ITalentRepository;
+
+    constructor({
+        teamRepo,
+        projectRepo,
+        talentRepo
+    }: {
+        teamRepo: ITeamRepository,
+        projectRepo: IProjectRepository,
+        talentRepo: ITalentRepository
+    }) {
+        this.teamRepo = teamRepo;
+        this.projectRepo = projectRepo;
+        this.talentRepo = talentRepo;
+    }
 
     private transformToDomain(team: any) {
         return {

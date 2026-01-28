@@ -1,9 +1,14 @@
-import { prisma } from './prisma';
+import { PrismaClient } from '@prisma/client';
 import { ITalentRepository } from '../../domain/repositories/ITalentRepository';
 
 export class PrismaTalentRepository implements ITalentRepository {
+    private prisma: PrismaClient;
+
+    constructor({ prisma }: { prisma: PrismaClient }) {
+        this.prisma = prisma;
+    }
     async findAll(): Promise<any[]> {
-        return prisma.talent.findMany({
+        return this.prisma.talent.findMany({
             include: {
                 user: {
                     select: {
@@ -17,7 +22,7 @@ export class PrismaTalentRepository implements ITalentRepository {
     }
 
     async findById(id: string): Promise<any | null> {
-        return prisma.talent.findUnique({
+        return this.prisma.talent.findUnique({
             where: { id },
             include: {
                 user: {
@@ -32,7 +37,7 @@ export class PrismaTalentRepository implements ITalentRepository {
     }
 
     async findByUserId(userId: string): Promise<any | null> {
-        return prisma.talent.findUnique({
+        return this.prisma.talent.findUnique({
             where: { userId },
             include: {
                 user: {
@@ -47,7 +52,7 @@ export class PrismaTalentRepository implements ITalentRepository {
     }
 
     async update(id: string, data: any): Promise<any> {
-        return prisma.talent.update({
+        return this.prisma.talent.update({
             where: { id },
             data,
             include: {

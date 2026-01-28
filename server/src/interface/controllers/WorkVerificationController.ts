@@ -2,7 +2,11 @@ import { Request, Response } from 'express';
 import { WorkVerificationService } from '../../application/services/WorkVerificationService';
 
 export class WorkVerificationController {
-    constructor(private workVerificationService: WorkVerificationService) { }
+    private workVerificationService: WorkVerificationService;
+
+    constructor({ workVerificationService }: { workVerificationService: WorkVerificationService }) {
+        this.workVerificationService = workVerificationService;
+    }
 
     logTime = async (req: Request, res: Response) => {
         try {

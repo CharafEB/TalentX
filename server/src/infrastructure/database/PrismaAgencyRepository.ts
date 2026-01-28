@@ -1,9 +1,14 @@
-import { prisma } from './prisma';
+import { PrismaClient } from '@prisma/client';
 import { IAgencyRepository } from '../../domain/repositories/IAgencyRepository';
 
 export class PrismaAgencyRepository implements IAgencyRepository {
+    private prisma: PrismaClient;
+
+    constructor({ prisma }: { prisma: PrismaClient }) {
+        this.prisma = prisma;
+    }
     async findAll(): Promise<any[]> {
-        return prisma.agency.findMany({
+        return this.prisma.agency.findMany({
             include: {
                 user: {
                     select: {
@@ -17,7 +22,7 @@ export class PrismaAgencyRepository implements IAgencyRepository {
     }
 
     async findById(id: string): Promise<any | null> {
-        return prisma.agency.findUnique({
+        return this.prisma.agency.findUnique({
             where: { id },
             include: {
                 user: {
@@ -32,7 +37,7 @@ export class PrismaAgencyRepository implements IAgencyRepository {
     }
 
     async findByUserId(userId: string): Promise<any | null> {
-        return prisma.agency.findUnique({
+        return this.prisma.agency.findUnique({
             where: { userId },
             include: {
                 user: {
@@ -47,7 +52,7 @@ export class PrismaAgencyRepository implements IAgencyRepository {
     }
 
     async update(id: string, data: any): Promise<any> {
-        return prisma.agency.update({
+        return this.prisma.agency.update({
             where: { id },
             data,
             include: {

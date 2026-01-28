@@ -10,13 +10,31 @@ import { IStorageGateway } from '../../domain/gateways/IStorageGateway';
 import { ISheetGateway } from '../../domain/gateways/ISheetGateway';
 
 export class ApplicationService {
-    constructor(
-        private applicationRepo: IApplicationRepository,
-        private notificationRepo: INotificationRepository,
-        private userRepo: IUserRepository,
-        private storageGateway: IStorageGateway,
-        private sheetGateway: ISheetGateway
-    ) { }
+    private applicationRepo: IApplicationRepository;
+    private notificationRepo: INotificationRepository;
+    private userRepo: IUserRepository;
+    private storageGateway: IStorageGateway;
+    private sheetGateway: ISheetGateway;
+
+    constructor({
+        applicationRepo,
+        notificationRepo,
+        userRepo,
+        storageGateway,
+        sheetGateway
+    }: {
+        applicationRepo: IApplicationRepository,
+        notificationRepo: INotificationRepository,
+        userRepo: IUserRepository,
+        storageGateway: IStorageGateway,
+        sheetGateway: ISheetGateway
+    }) {
+        this.applicationRepo = applicationRepo;
+        this.notificationRepo = notificationRepo;
+        this.userRepo = userRepo;
+        this.storageGateway = storageGateway;
+        this.sheetGateway = sheetGateway;
+    }
 
     async submitApplication(dto: CreateApplicationDTO, file?: Express.Multer.File): Promise<Application> {
         // 1. Upload Resume

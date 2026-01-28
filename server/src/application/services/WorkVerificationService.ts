@@ -6,13 +6,31 @@ import { ITalentRepository } from '../../domain/repositories/ITalentRepository';
 import { TimeLog, Milestone } from '@prisma/client';
 
 export class WorkVerificationService {
-    constructor(
-        private timeLogRepo: ITimeLogRepository,
-        private milestoneRepo: IMilestoneRepository,
-        private projectRepo: IProjectRepository,
-        private talentRepo: ITalentRepository,
-        private notificationRepo: INotificationRepository
-    ) { }
+    private timeLogRepo: ITimeLogRepository;
+    private milestoneRepo: IMilestoneRepository;
+    private projectRepo: IProjectRepository;
+    private talentRepo: ITalentRepository;
+    private notificationRepo: INotificationRepository;
+
+    constructor({
+        timeLogRepo,
+        milestoneRepo,
+        projectRepo,
+        talentRepo,
+        notificationRepo
+    }: {
+        timeLogRepo: ITimeLogRepository,
+        milestoneRepo: IMilestoneRepository,
+        projectRepo: IProjectRepository,
+        talentRepo: ITalentRepository,
+        notificationRepo: INotificationRepository
+    }) {
+        this.timeLogRepo = timeLogRepo;
+        this.milestoneRepo = milestoneRepo;
+        this.projectRepo = projectRepo;
+        this.talentRepo = talentRepo;
+        this.notificationRepo = notificationRepo;
+    }
 
     // --- Time Log Operations ---
 

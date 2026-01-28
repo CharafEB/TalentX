@@ -3,9 +3,11 @@ import { Request, Response } from 'express';
 import { ContractService } from '../../application/services/ContractService';
 
 export class ContractController {
-    constructor(
-        private contractService: ContractService
-    ) { }
+    private contractService: ContractService;
+
+    constructor({ contractService }: { contractService: ContractService }) {
+        this.contractService = contractService;
+    }
 
     createContract = async (req: Request, res: Response) => {
         try {

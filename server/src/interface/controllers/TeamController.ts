@@ -3,7 +3,11 @@ import { TeamService } from '../../application/services/TeamService';
 import { GenerateTeamSchema, HireTeamSchema } from '../../application/dtos/TeamDTO';
 
 export class TeamController {
-    constructor(private teamService: TeamService) { }
+    private teamService: TeamService;
+
+    constructor({ teamService }: { teamService: TeamService }) {
+        this.teamService = teamService;
+    }
 
     listTeams = async (req: Request, res: Response) => {
         try {
