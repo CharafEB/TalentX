@@ -39,6 +39,7 @@ import TaskModal from "@/widgets/Dashboard/TaskModal";
 import { MessagesView } from "@/widgets/Dashboard/MessagesView";
 import { Badge } from "@/shared/components/ui/badge";
 import NotificationCenter from "@/widgets/Dashboard/NotificationCenter";
+import { DashboardSkeleton } from "@/shared/components/ui/skeleton-variants";
 import { useAuthStore } from "@/features/auth/model/auth.store";
 import {
   Tabs,
@@ -104,6 +105,7 @@ function DashboardContent() {
     queryKey: ["projects", user?.id],
     queryFn: async () => talentXApi.entities.Project.list(),
     enabled: !!user,
+    staleTime: 30000, // Consider data fresh for 30 seconds
   });
 
   const { data: tasks = [] } = useQuery({
@@ -118,6 +120,7 @@ function DashboardContent() {
       return [];
     },
     enabled: !!user,
+    staleTime: 30000, // Consider data fresh for 30 seconds
   });
 
   const { data: unreadCounts } = useQuery({
@@ -125,6 +128,7 @@ function DashboardContent() {
     queryFn: async () => talentXApi.entities.Message.getUnreadCount(),
     enabled: !!user,
     refetchInterval: 15000,
+    staleTime: 10000, // Consider data fresh for 10 seconds
   });
 
   const { data: talentProfile, refetch: refetchTalentProfile } = useQuery({
@@ -134,6 +138,7 @@ function DashboardContent() {
       return await talentXApi.entities.Talent.getByUserId(user.id);
     },
     enabled: !!user && user.role === "talent",
+    staleTime: 60000, // Consider data fresh for 60 seconds (profile changes less frequently)
   });
 
   const { data: agencyProfile, refetch: refetchAgencyProfile } = useQuery({
@@ -143,6 +148,7 @@ function DashboardContent() {
       return await talentXApi.entities.Agency.getByUserId(user.id);
     },
     enabled: !!user && user.role === "agency",
+    staleTime: 60000, // Consider data fresh for 60 seconds (profile changes less frequently)
   });
 
   // --- Mutations ---
@@ -1603,12 +1609,9 @@ function DashboardContent() {
     </div>
   );
 
-  if (!user)
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        Loading...
-      </div>
-    );
+  if (!user) {
+    return <DashboardSkeleton />;
+  }
 
   if (user.role === "client") {
     return (
@@ -1732,13 +1735,7 @@ function DashboardContent() {
 
 export default function DashboardPage() {
   return (
-    <React.Suspense
-      fallback={
-        <div className="min-h-screen flex items-center justify-center">
-          Loading Dashboard...
-        </div>
-      }
-    >
+    <React.Suspense fallback={<DashboardSkeleton />}>
       <DashboardContent />
     </React.Suspense>
   );

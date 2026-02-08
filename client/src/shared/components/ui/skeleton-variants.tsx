@@ -121,7 +121,7 @@ export function DashboardSkeleton() {
                 {/* Stats Grid */}
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                     {[1, 2, 3, 4].map(i => (
-                        <div key={i} className="bg-white p-6 rounded-2xl border border-gray-200 space-y-3">
+                        <div key={i} className="bg-gray-300 p-6 rounded-2xl border border-gray-200 space-y-3">
                             <Skeleton className="h-10 w-10 rounded-lg" />
                             <Skeleton className="h-4 w-24" />
                             <Skeleton className="h-8 w-16" />
@@ -131,14 +131,14 @@ export function DashboardSkeleton() {
 
                 {/* Content Grid */}
                 <div className="grid lg:grid-cols-3 gap-8">
-                    <div className="lg:col-span-2 bg-white p-6 rounded-2xl border border-gray-200 space-y-4">
+                    <div className="lg:col-span-2 bg-gray-300 p-6 rounded-2xl border border-gray-200 space-y-4">
                         <Skeleton className="h-6 w-32" />
                         {[1, 2, 3].map(i => (
                             <Skeleton key={i} className="h-20 w-full rounded-xl" />
                         ))}
                     </div>
                     <div className="space-y-6">
-                        <div className="bg-white p-6 rounded-2xl border border-gray-200 space-y-3">
+                        <div className="bg-gray-300 p-6 rounded-2xl border border-gray-200 space-y-3">
                             <Skeleton className="h-6 w-24" />
                             {[1, 2, 3].map(i => (
                                 <Skeleton key={i} className="h-12 w-full rounded-xl" />
