@@ -1,7 +1,10 @@
 import { INotificationRepository } from '../../domain/repositories/INotificationRepository';
 
 export class NotificationService {
-    constructor(private notificationRepo: INotificationRepository) { }
+    private notificationRepo: INotificationRepository;
+    constructor({ notificationRepo }: { notificationRepo: INotificationRepository }) {
+        this.notificationRepo = notificationRepo;
+    }
 
     async listNotifications(userId: string) {
         // We need a findByUserId in Repo. I think I only defined create?

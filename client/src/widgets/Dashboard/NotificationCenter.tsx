@@ -3,8 +3,8 @@
 import React, { useMemo, useState, useEffect, useRef } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Bell, Check, Loader2, Info, CheckCircle, Mail, X, DollarSign } from 'lucide-react';
-import { Button } from "@/shared/components/ui/button";
-import { Badge } from "@/shared/components/ui/badge";
+import { Button } from '@/shared/components/ui/button';
+import { Badge } from '@/shared/components/ui/badge';
 import { useRouter, usePathname } from 'next/navigation';
 import { talentXApi, API_URL } from '@/shared/api/talentXApi';
 
@@ -64,7 +64,7 @@ export default function NotificationCenter({ userId }: NotificationCenterProps) 
                 // Some notifications might have different naming
                 if (!projectId && data.applicationId) projectId = data.applicationId;
             } catch (e) {
-                console.error("Failed to parse notification data", e);
+                console.error('Failed to parse notification data', e);
             }
         }
 
@@ -76,7 +76,10 @@ export default function NotificationCenter({ userId }: NotificationCenterProps) 
             router.push(`${basePath}?view=messages`);
         } else if (projectId) {
             router.push(`${basePath}?project=${projectId}`);
-        } else if (notif.type === 'application_accepted' || notif.type === 'application_status_update') {
+        } else if (
+            notif.type === 'application_accepted' ||
+            notif.type === 'application_status_update'
+        ) {
             router.push(`${basePath}?view=overview`);
         }
     };
@@ -98,7 +101,7 @@ export default function NotificationCenter({ userId }: NotificationCenterProps) 
             // Use talentXApi for fetching notifications
             return await talentXApi.entities.Notification.list(userId);
         },
-        refetchInterval: 15000 // Poll every 15s for better responsiveness during testing
+        refetchInterval: 15000, // Poll every 15s for better responsiveness during testing
     });
 
     const unreadCount = useMemo(
@@ -112,7 +115,7 @@ export default function NotificationCenter({ userId }: NotificationCenterProps) 
         },
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ['notifications', userId] });
-        }
+        },
     });
 
     const getIcon = (type: string) => {
@@ -153,7 +156,10 @@ export default function NotificationCenter({ userId }: NotificationCenterProps) 
                         <div className="flex items-center gap-2">
                             <h3 className="text-sm font-bold text-gray-900">Notifications</h3>
                             {unreadCount > 0 && (
-                                <Badge variant="secondary" className="bg-blue-50 text-blue-600 border-blue-100 text-[10px] py-0 px-1.5">
+                                <Badge
+                                    variant="secondary"
+                                    className="bg-blue-50 text-blue-600 border-blue-100 text-[10px] py-0 px-1.5"
+                                >
                                     {unreadCount} New
                                 </Badge>
                             )}
@@ -181,12 +187,16 @@ export default function NotificationCenter({ userId }: NotificationCenterProps) 
                                         onClick={() => handleNotificationClick(notif)}
                                     >
                                         <div className="mt-1 flex-shrink-0">
-                                            <div className={`p-2 rounded-lg ${!notif.isRead ? 'bg-white shadow-sm' : 'bg-gray-50'}`}>
+                                            <div
+                                                className={`p-2 rounded-lg ${!notif.isRead ? 'bg-white shadow-sm' : 'bg-gray-50'}`}
+                                            >
                                                 {getIcon(notif.type)}
                                             </div>
                                         </div>
                                         <div className="flex-1 space-y-1 min-w-0">
-                                            <p className={`text-sm leading-snug break-words ${!notif.isRead ? 'font-bold text-gray-900' : 'text-gray-600'}`}>
+                                            <p
+                                                className={`text-sm leading-snug break-words ${!notif.isRead ? 'font-bold text-gray-900' : 'text-gray-600'}`}
+                                            >
                                                 {notif.content}
                                             </p>
                                             <p className="text-[10px] text-gray-400 font-medium">
@@ -214,7 +224,9 @@ export default function NotificationCenter({ userId }: NotificationCenterProps) 
                                     <Bell className="w-6 h-6 opacity-20" />
                                 </div>
                                 <p className="text-sm font-bold text-gray-900">All caught up!</p>
-                                <p className="text-xs font-medium">No new notifications at the moment.</p>
+                                <p className="text-xs font-medium">
+                                    No new notifications at the moment.
+                                </p>
                             </div>
                         )}
                     </div>

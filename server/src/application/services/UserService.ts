@@ -4,10 +4,19 @@ import { AuditLogService } from './AuditLogService';
 import bcrypt from 'bcryptjs';
 
 export class UserService {
-    constructor(
-        private userRepo: IUserRepository,
-        private auditLogService: AuditLogService
-    ) { }
+    private userRepo: IUserRepository;
+    private auditLogService: AuditLogService;
+
+    constructor({
+        userRepo,
+        auditLogService,
+    }: {
+        userRepo: IUserRepository;
+        auditLogService: AuditLogService;
+    }) {
+        this.userRepo = userRepo;
+        this.auditLogService = auditLogService;
+    }
 
     async getAllUsers() {
         return this.userRepo.findAll();
@@ -15,7 +24,7 @@ export class UserService {
 
     async getUserById(id: string) {
         const user = await this.userRepo.findById(id);
-        if (!user) throw new Error("User not found");
+        if (!user) throw new Error('User not found');
         return user;
     }
 
@@ -24,7 +33,7 @@ export class UserService {
         await this.auditLogService.logAction(adminId, 'CREATE', 'User', newUser.id, {
             name: data.full_name,
             email: data.email,
-            role: data.role
+            role: data.role,
         });
         return newUser;
     }
@@ -36,14 +45,20 @@ export class UserService {
             updateData.password = await bcrypt.hash((dto as any).password, 10);
         }
         const result = await this.userRepo.update(id, updateData);
-        await this.auditLogService.logAction(adminId, 'UPDATE', 'User', id, { ...dto, password: (dto as any).password ? '****' : undefined });
+        await this.auditLogService.logAction(adminId, 'UPDATE', 'User', id, {
+            ...dto,
+            password: (dto as any).password ? '****' : undefined,
+        });
         return result;
     }
 
     async deleteUser(adminId: string, id: string) {
         const user = await this.userRepo.findById(id);
         const result = await this.userRepo.delete(id);
-        await this.auditLogService.logAction(adminId, 'DELETE', 'User', id, { name: user?.full_name, email: user?.email });
+        await this.auditLogService.logAction(adminId, 'DELETE', 'User', id, {
+            name: user?.full_name,
+            email: user?.email,
+        });
         return result;
     }
 }

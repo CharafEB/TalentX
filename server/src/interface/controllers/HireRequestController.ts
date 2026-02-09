@@ -3,7 +3,11 @@ import { HireRequestService } from '../../application/services/HireRequestServic
 import { CreateHireRequestSchema } from '../../application/dtos/HireRequestDTO';
 
 export class HireRequestController {
-    constructor(private hireRequestService: HireRequestService) { }
+    private hireRequestService: HireRequestService;
+
+    constructor({ hireRequestService }: { hireRequestService: HireRequestService }) {
+        this.hireRequestService = hireRequestService;
+    }
 
     createHireRequest = async (req: Request, res: Response) => {
         try {
@@ -34,7 +38,9 @@ export class HireRequestController {
             const request = await this.hireRequestService.updateStatus(id, status);
             res.json(request);
         } catch (error: any) {
-            res.status(500).json({ message: error.message || 'Error updating hire request status' });
+            res.status(500).json({
+                message: error.message || 'Error updating hire request status',
+            });
         }
     };
 }

@@ -6,17 +6,38 @@ import { ITalentRepository } from '../../domain/repositories/ITalentRepository';
 import { TimeLog, Milestone } from '@prisma/client';
 
 export class WorkVerificationService {
-    constructor(
-        private timeLogRepo: ITimeLogRepository,
-        private milestoneRepo: IMilestoneRepository,
-        private projectRepo: IProjectRepository,
-        private talentRepo: ITalentRepository,
-        private notificationRepo: INotificationRepository
-    ) { }
+    private timeLogRepo: ITimeLogRepository;
+    private milestoneRepo: IMilestoneRepository;
+    private projectRepo: IProjectRepository;
+    private talentRepo: ITalentRepository;
+    private notificationRepo: INotificationRepository;
+
+    constructor({
+        timeLogRepo,
+        milestoneRepo,
+        projectRepo,
+        talentRepo,
+        notificationRepo,
+    }: {
+        timeLogRepo: ITimeLogRepository;
+        milestoneRepo: IMilestoneRepository;
+        projectRepo: IProjectRepository;
+        talentRepo: ITalentRepository;
+        notificationRepo: INotificationRepository;
+    }) {
+        this.timeLogRepo = timeLogRepo;
+        this.milestoneRepo = milestoneRepo;
+        this.projectRepo = projectRepo;
+        this.talentRepo = talentRepo;
+        this.notificationRepo = notificationRepo;
+    }
 
     // --- Time Log Operations ---
 
-    async logTime(userId: string, data: { projectId: string; hours: number; description: string; date: string }): Promise<TimeLog> {
+    async logTime(
+        userId: string,
+        data: { projectId: string; hours: number; description: string; date: string }
+    ): Promise<TimeLog> {
         const talent = await this.talentRepo.findByUserId(userId);
         if (!talent) throw new Error('Talent profile not found');
 
@@ -29,7 +50,7 @@ export class WorkVerificationService {
             hours: data.hours,
             description: data.description,
             date: new Date(data.date),
-            status: 'pending'
+            status: 'pending',
         });
 
         // Notify Client
@@ -37,7 +58,7 @@ export class WorkVerificationService {
             type: 'time_log_submitted',
             content: `${talent.user.full_name} logged ${data.hours} hours for project "${project.name}".`,
             userId: project.clientId,
-            data: JSON.stringify({ projectId: project.id, timeLogId: timeLog.id })
+            data: JSON.stringify({ projectId: project.id, timeLogId: timeLog.id }),
         });
 
         return timeLog;
@@ -52,7 +73,7 @@ export class WorkVerificationService {
             await this.notificationRepo.create({
                 type: 'time_log_approved',
                 content: `Your time log for ${timeLog.hours} hours has been approved.`,
-                userId: talent.userId
+                userId: talent.userId,
             });
         }
 
@@ -69,11 +90,17 @@ export class WorkVerificationService {
 
     // --- Milestone Operations ---
 
-    async createMilestone(data: { projectId: string; title: string; description: string; amount: number; due_date?: string }): Promise<Milestone> {
+    async createMilestone(data: {
+        projectId: string;
+        title: string;
+        description: string;
+        amount: number;
+        due_date?: string;
+    }): Promise<Milestone> {
         return this.milestoneRepo.create({
             ...data,
             due_date: data.due_date ? new Date(data.due_date) : null,
-            status: 'pending'
+            status: 'pending',
         });
     }
 
@@ -87,7 +114,7 @@ export class WorkVerificationService {
                 type: 'milestone_approval_requested',
                 content: `Approval requested for milestone "${milestone.title}" on project "${project.name}".`,
                 userId: project.clientId,
-                data: JSON.stringify({ projectId: project.id, milestoneId: milestone.id })
+                data: JSON.stringify({ projectId: project.id, milestoneId: milestone.id }),
             });
         }
 
@@ -110,7 +137,7 @@ export class WorkVerificationService {
                         type: 'milestone_approved',
                         content: `Milestone "${milestone.title}" has been approved. Funds are ready for release.`,
                         userId: talent.userId,
-                        data: JSON.stringify({ projectId: project.id, milestoneId: milestone.id })
+                        data: JSON.stringify({ projectId: project.id, milestoneId: milestone.id }),
                     });
                 }
             }

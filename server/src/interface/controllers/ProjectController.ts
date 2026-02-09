@@ -1,10 +1,20 @@
 import { Request, Response } from 'express';
 import { ProjectService } from '../../application/services/ProjectService';
-import { CreateProjectSchema, UpdateProjectSchema, RecordPaymentSchema, CompleteProjectSchema, ReleasePaymentSchema } from '../../application/dtos/ProjectDTO';
+import {
+    CreateProjectSchema,
+    UpdateProjectSchema,
+    RecordPaymentSchema,
+    CompleteProjectSchema,
+    ReleasePaymentSchema,
+} from '../../application/dtos/ProjectDTO';
 import { AuthRequest } from '../middleware/AuthMiddleware';
 
 export class ProjectController {
-    constructor(private projectService: ProjectService) { }
+    private projectService: ProjectService;
+
+    constructor({ projectService }: { projectService: ProjectService }) {
+        this.projectService = projectService;
+    }
 
     createProject = async (req: AuthRequest, res: Response) => {
         try {
@@ -12,7 +22,7 @@ export class ProjectController {
             const body = {
                 ...req.body,
                 clientId: req.body.clientId || req.user?.id,
-                client_email: req.body.client_email || req.user?.email
+                client_email: req.body.client_email || req.user?.email,
             };
 
             const validation = CreateProjectSchema.safeParse(body);
@@ -54,7 +64,11 @@ export class ProjectController {
             if (!validation.success) {
                 return res.status(400).json({ errors: (validation.error as any).errors });
             }
-            const project = await this.projectService.updateProject(req.user!.id, req.params.id, validation.data);
+            const project = await this.projectService.updateProject(
+                req.user!.id,
+                req.params.id,
+                validation.data
+            );
             res.json(project);
         } catch (error: any) {
             res.status(500).json({ message: error.message || 'Error updating project' });
@@ -89,7 +103,11 @@ export class ProjectController {
             if (!validation.success) {
                 return res.status(400).json({ errors: (validation.error as any).errors });
             }
-            const project = await this.projectService.completeProject(req.user!.id, req.params.id, validation.data);
+            const project = await this.projectService.completeProject(
+                req.user!.id,
+                req.params.id,
+                validation.data
+            );
             res.json(project);
         } catch (error: any) {
             res.status(500).json({ message: error.message || 'Error completing project' });

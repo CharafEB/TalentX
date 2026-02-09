@@ -1,9 +1,18 @@
 import { PrismaClient } from '@prisma/client';
 
 export class AuditLogService {
-    constructor(private prisma: PrismaClient) { }
+    private prisma: PrismaClient;
+    constructor({ prisma }: { prisma: PrismaClient }) {
+        this.prisma = prisma;
+    }
 
-    async logAction(adminId: string | null, action: string, entityType: string, entityId?: string, details?: any) {
+    async logAction(
+        adminId: string | null,
+        action: string,
+        entityType: string,
+        entityId?: string,
+        details?: any
+    ) {
         try {
             return await this.prisma.auditLog.create({
                 data: {
@@ -11,8 +20,8 @@ export class AuditLogService {
                     action,
                     entityType,
                     entityId,
-                    details: details ? JSON.stringify(details) : null
-                }
+                    details: details ? JSON.stringify(details) : null,
+                },
             });
         } catch (error) {
             console.error('Failed to create audit log:', error);
@@ -45,14 +54,14 @@ export class AuditLogService {
                     select: {
                         full_name: true,
                         email: true,
-                        avatar_url: true
-                    }
-                }
+                        avatar_url: true,
+                    },
+                },
             },
             orderBy: {
-                createdAt: 'desc'
+                createdAt: 'desc',
             },
-            take: 200 // Increased limit
+            take: 200, // Increased limit
         });
     }
 }

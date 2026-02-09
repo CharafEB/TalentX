@@ -4,24 +4,36 @@ import { IUserRepository } from '../../domain/repositories/IUserRepository';
 import { CreateMessageDTO } from '../dtos/MessageDTO';
 
 export class MessageService {
-    private static SUPPORT_ID = "support-system-user-id-001";
+    private static SUPPORT_ID = 'support-system-user-id-001';
 
-    constructor(
-        private messageRepo: IMessageRepository,
-        private notificationRepo: INotificationRepository,
-        private userRepo: IUserRepository // To find admins for notifications
-    ) { }
+    private messageRepo: IMessageRepository;
+    private notificationRepo: INotificationRepository;
+    private userRepo: IUserRepository;
+
+    constructor({
+        messageRepo,
+        notificationRepo,
+        userRepo,
+    }: {
+        messageRepo: IMessageRepository;
+        notificationRepo: INotificationRepository;
+        userRepo: IUserRepository;
+    }) {
+        this.messageRepo = messageRepo;
+        this.notificationRepo = notificationRepo;
+        this.userRepo = userRepo;
+    }
 
     private formatMessage(m: any) {
         return {
             ...m,
             sender_name:
                 m.senderId === MessageService.SUPPORT_ID
-                    ? "Admin Support"
-                    : m.sender?.full_name || "System",
+                    ? 'Admin Support'
+                    : m.sender?.full_name || 'System',
             sender_avatar:
                 m.senderId === MessageService.SUPPORT_ID
-                    ? "https://ui-avatars.com/api/?name=Admin+Support&background=00c853&color=fff"
+                    ? 'https://ui-avatars.com/api/?name=Admin+Support&background=00c853&color=fff'
                     : m.sender?.avatar_url,
         };
     }
@@ -29,7 +41,7 @@ export class MessageService {
     private formatThreads(threads: any[]) {
         return threads.map((t) => ({
             userId: t.senderId,
-            userName: t.sender?.full_name || "Unknown User",
+            userName: t.sender?.full_name || 'Unknown User',
             userAvatar: t.sender?.avatar_url || null,
             lastMessage: t.content,
             time: t.timestamp,
@@ -50,9 +62,12 @@ export class MessageService {
         }
 
         if (isSupport) {
-            const targetId = (this.isSupportStaff(role) && targetQueryId) ? targetQueryId : userId;
-            const messages = await this.messageRepo.findSupportMessages(targetId, MessageService.SUPPORT_ID);
-            return messages.map(m => this.formatMessage(m));
+            const targetId = this.isSupportStaff(role) && targetQueryId ? targetQueryId : userId;
+            const messages = await this.messageRepo.findSupportMessages(
+                targetId,
+                MessageService.SUPPORT_ID
+            );
+            return messages.map((m) => this.formatMessage(m));
         }
 
         // Direct Messages
@@ -61,11 +76,11 @@ export class MessageService {
             return [];
         }
         const messages = await this.messageRepo.findDirectMessages(userId, targetQueryId);
-        return messages.map(m => this.formatMessage(m));
+        return messages.map((m) => this.formatMessage(m));
     }
 
     async createMessage(senderId: string, role: string, dto: CreateMessageDTO) {
-        const isSupport = dto.isSupport === true || dto.isSupport === "true";
+        const isSupport = dto.isSupport === true || dto.isSupport === 'true';
 
         if (isSupport) {
             await this.userRepo.ensureSupportUser(MessageService.SUPPORT_ID);
@@ -73,30 +88,32 @@ export class MessageService {
 
         // Validate receiver_id for non-support messages
         if (!isSupport && !dto.receiver_id) {
-            throw new Error("receiver_id is required for direct messages");
+            throw new Error('receiver_id is required for direct messages');
         }
 
-        const actualSenderId = isSupport && this.isSupportStaff(role) ? MessageService.SUPPORT_ID : senderId;
-        const actualReceiverId = isSupport && !this.isSupportStaff(role) ? MessageService.SUPPORT_ID : dto.receiver_id!;
+        const actualSenderId =
+            isSupport && this.isSupportStaff(role) ? MessageService.SUPPORT_ID : senderId;
+        const actualReceiverId =
+            isSupport && !this.isSupportStaff(role) ? MessageService.SUPPORT_ID : dto.receiver_id!;
 
         const message = await this.messageRepo.create({
             senderId: actualSenderId,
             receiverId: actualReceiverId,
-            content: dto.content
+            content: dto.content,
         });
 
         // Notifications
         if (isSupport && !this.isSupportStaff(role)) {
             // Notify all admins and core_team
             const allUsers = await (this.userRepo as any).findAll();
-            const supportStaff = (allUsers as any[]).filter(u => this.isSupportStaff(u.role));
+            const supportStaff = (allUsers as any[]).filter((u) => this.isSupportStaff(u.role));
 
             for (const staff of supportStaff) {
                 await this.notificationRepo.create({
                     userId: staff.id,
-                    type: "support_ticket",
+                    type: 'support_ticket',
                     content: `New support ticket: "${dto.content.substring(0, 30)}..."`,
-                    data: JSON.stringify({ senderId, messageId: message.id })
+                    data: JSON.stringify({ senderId, messageId: message.id }),
                 });
             }
         }
@@ -105,7 +122,11 @@ export class MessageService {
     }
 
     async getUnreadCount(userId: string, role: string) {
-        return this.messageRepo.countUnreadLegacy(userId, MessageService.SUPPORT_ID, this.isSupportStaff(role));
+        return this.messageRepo.countUnreadLegacy(
+            userId,
+            MessageService.SUPPORT_ID,
+            this.isSupportStaff(role)
+        );
     }
 
     async markAsRead(userId: string, role: string, dto: any) {

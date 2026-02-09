@@ -1,31 +1,39 @@
-import { prisma } from './prisma';
+import { PrismaClient } from '@prisma/client';
 import { ITeamRepository } from '../../domain/repositories/ITeamRepository';
 
 export class PrismaTeamRepository implements ITeamRepository {
+    private prisma: PrismaClient;
+
+    constructor({ prisma }: { prisma: PrismaClient }) {
+        this.prisma = prisma;
+    }
     async findAll(): Promise<any[]> {
-        return prisma.team.findMany({
+        return this.prisma.team.findMany({
             include: { members: { include: { talent: { include: { user: true } } } } }
         });
     }
 
     async findById(id: string): Promise<any | null> {
-        return prisma.team.findUnique({
+        return this.prisma.team.findUnique({
             where: { id },
-            include: { members: { include: { talent: { include: { user: true } } } } }
+            include: { members: { include: { talent: { include: { user: true } } } } },
         });
     }
 
     async findTalentsBySkills(skills: string[], limit: number): Promise<any[]> {
-        const whereClause = skills.length > 0 ? {
-            OR: skills.map((skill: string) => ({
-                skills: {
-                    contains: skill,
-                    mode: 'insensitive',
-                },
-            })),
-        } : {};
+        const whereClause =
+            skills.length > 0
+                ? {
+                      OR: skills.map((skill: string) => ({
+                          skills: {
+                              contains: skill,
+                              mode: 'insensitive',
+                          },
+                      })),
+                  }
+                : {};
 
-        return prisma.talent.findMany({
+        return this.prisma.talent.findMany({
             where: whereClause as any,
             include: {
                 user: {
@@ -35,16 +43,16 @@ export class PrismaTeamRepository implements ITeamRepository {
                     },
                 },
             },
-            take: limit
+            take: limit,
         });
     }
 
     async addProjectMembership(data: any): Promise<any> {
-        return prisma.projectMembership.create({ data });
+        return this.prisma.projectMembership.create({ data });
     }
 
     async findProjectMembership(projectId: string, talentId: string): Promise<any | null> {
-        return prisma.projectMembership.findUnique({
+        return this.prisma.projectMembership.findUnique({
             where: { projectId_talentId: { projectId, talentId } }
         });
     }

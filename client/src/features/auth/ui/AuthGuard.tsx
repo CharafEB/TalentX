@@ -1,10 +1,10 @@
 'use client';
 
-import { useAuthStore } from "@/features/auth/model/auth.store";
-import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
-import { Loader2 } from "lucide-react";
-import { createPageUrl } from "@/shared/lib/utils";
+import { useAuthStore } from '@/features/auth/model/auth.store';
+import { useRouter } from 'next/navigation';
+import { useEffect, useState } from 'react';
+import { Loader2 } from 'lucide-react';
+import { createPageUrl } from '@/shared/lib/utils';
 
 export default function AuthGuard({ children }: { children: React.ReactNode }) {
     const { isAuthenticated, isLoading, user } = useAuthStore();

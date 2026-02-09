@@ -2,7 +2,11 @@ import { Request, Response } from 'express';
 import { SystemSettingService } from '../../application/services/SystemSettingService';
 
 export class SystemSettingController {
-    constructor(private systemSettingService: SystemSettingService) { }
+    private systemSettingService: SystemSettingService;
+
+    constructor({ systemSettingService }: { systemSettingService: SystemSettingService }) {
+        this.systemSettingService = systemSettingService;
+    }
 
     getMaintenanceMode = async (req: Request, res: Response) => {
         try {

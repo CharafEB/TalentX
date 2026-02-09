@@ -2,7 +2,11 @@ import { Request, Response } from 'express';
 import { AuditLogService } from '../../application/services/AuditLogService';
 
 export class AuditLogController {
-    constructor(private auditLogService: AuditLogService) { }
+    private auditLogService: AuditLogService;
+
+    constructor({ auditLogService }: { auditLogService: AuditLogService }) {
+        this.auditLogService = auditLogService;
+    }
 
     async listLogs(req: Request, res: Response) {
         try {

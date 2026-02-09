@@ -1,7 +1,10 @@
 import { ISystemSettingRepository } from '../../domain/repositories/ISystemSettingRepository';
 
 export class SystemSettingService {
-    constructor(private settingRepo: ISystemSettingRepository) { }
+    private settingRepo: ISystemSettingRepository;
+    constructor({ settingRepo }: { settingRepo: ISystemSettingRepository }) {
+        this.settingRepo = settingRepo;
+    }
 
     async getMaintenanceMode(): Promise<boolean> {
         const setting = await this.settingRepo.findByKey('maintenance_mode');

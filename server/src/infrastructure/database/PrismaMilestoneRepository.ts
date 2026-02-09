@@ -2,7 +2,11 @@ import { PrismaClient, Milestone } from '@prisma/client';
 import { IMilestoneRepository } from '../../domain/repositories/IMilestoneRepository';
 
 export class PrismaMilestoneRepository implements IMilestoneRepository {
-    constructor(private prisma: PrismaClient) { }
+    private prisma: PrismaClient;
+
+    constructor({ prisma }: { prisma: PrismaClient }) {
+        this.prisma = prisma;
+    }
 
     async create(data: any): Promise<Milestone> {
         return this.prisma.milestone.create({ data });
@@ -15,21 +19,21 @@ export class PrismaMilestoneRepository implements IMilestoneRepository {
     async findByProjectId(projectId: string): Promise<Milestone[]> {
         return this.prisma.milestone.findMany({
             where: { projectId },
-            orderBy: { createdAt: 'asc' }
+            orderBy: { createdAt: 'asc' },
         });
     }
 
     async updateStatus(id: string, status: string): Promise<Milestone> {
         return this.prisma.milestone.update({
             where: { id },
-            data: { status }
+            data: { status },
         });
     }
 
     async update(id: string, data: any): Promise<Milestone> {
         return this.prisma.milestone.update({
             where: { id },
-            data
+            data,
         });
     }
 

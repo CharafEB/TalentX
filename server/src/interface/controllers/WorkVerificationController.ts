@@ -2,7 +2,11 @@ import { Request, Response } from 'express';
 import { WorkVerificationService } from '../../application/services/WorkVerificationService';
 
 export class WorkVerificationController {
-    constructor(private workVerificationService: WorkVerificationService) { }
+    private workVerificationService: WorkVerificationService;
+
+    constructor({ workVerificationService }: { workVerificationService: WorkVerificationService }) {
+        this.workVerificationService = workVerificationService;
+    }
 
     logTime = async (req: Request, res: Response) => {
         try {
@@ -33,7 +37,9 @@ export class WorkVerificationController {
 
     getTimeLogsByProject = async (req: Request, res: Response) => {
         try {
-            const timeLogs = await this.workVerificationService.getTimeLogsByProject(req.params.projectId);
+            const timeLogs = await this.workVerificationService.getTimeLogsByProject(
+                req.params.projectId
+            );
             res.json(timeLogs);
         } catch (error: any) {
             res.status(400).json({ error: error.message });
@@ -51,7 +57,9 @@ export class WorkVerificationController {
 
     requestMilestoneApproval = async (req: Request, res: Response) => {
         try {
-            const milestone = await this.workVerificationService.requestMilestoneApproval(req.params.id);
+            const milestone = await this.workVerificationService.requestMilestoneApproval(
+                req.params.id
+            );
             res.json(milestone);
         } catch (error: any) {
             res.status(400).json({ error: error.message });
@@ -69,7 +77,9 @@ export class WorkVerificationController {
 
     getMilestonesByProject = async (req: Request, res: Response) => {
         try {
-            const milestones = await this.workVerificationService.getMilestonesByProject(req.params.projectId);
+            const milestones = await this.workVerificationService.getMilestonesByProject(
+                req.params.projectId
+            );
             res.json(milestones);
         } catch (error: any) {
             res.status(400).json({ error: error.message });

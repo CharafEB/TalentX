@@ -3,10 +3,19 @@ import { INotificationRepository } from '../../domain/repositories/INotification
 import { CreateTaskDTO, UpdateTaskDTO } from '../dtos/TaskDTO';
 
 export class TaskService {
-    constructor(
-        private taskRepo: ITaskRepository,
-        private notificationRepo: INotificationRepository
-    ) { }
+    private taskRepo: ITaskRepository;
+    private notificationRepo: INotificationRepository;
+
+    constructor({
+        taskRepo,
+        notificationRepo,
+    }: {
+        taskRepo: ITaskRepository;
+        notificationRepo: INotificationRepository;
+    }) {
+        this.taskRepo = taskRepo;
+        this.notificationRepo = notificationRepo;
+    }
 
     async createTask(dto: CreateTaskDTO) {
         const taskData = {
@@ -16,7 +25,7 @@ export class TaskService {
             status: dto.status,
             priority: dto.priority,
             due_date: dto.due_date ? new Date(dto.due_date) : undefined,
-            assigneeId: dto.assignee_id
+            assigneeId: dto.assignee_id,
         };
 
         const task = await this.taskRepo.create(taskData);
@@ -27,7 +36,7 @@ export class TaskService {
                 type: 'task_assigned',
                 content: `You have been assigned a new task: "${task.title}" in project "${task.project?.name}"`,
                 userId: task.assigneeId,
-                data: JSON.stringify({ taskId: task.id, projectId: task.projectId })
+                data: JSON.stringify({ taskId: task.id, projectId: task.projectId }),
             });
         }
 
@@ -36,7 +45,7 @@ export class TaskService {
 
     async updateTask(id: string, dto: UpdateTaskDTO) {
         // Fetch current task to check assignee change if needed, optimizing by just notifying if new assignee
-        // Or matching legacy exactly which checks (assignee_id && task.assigneeId === assignee_id) -> Wait logic in legacy was notifying if "assignee_id" passed matches existing? 
+        // Or matching legacy exactly which checks (assignee_id && task.assigneeId === assignee_id) -> Wait logic in legacy was notifying if "assignee_id" passed matches existing?
         // Logic: if (assignee_id && task.assigneeId === assignee_id) ... wait line 80 in legacy
         // "if (assignee_id && task.assigneeId === assignee_id)" -> This implies notifying if it REMAINS the same? Or typo in legacy?
         // Likely intended: if assignee changed OR if just assigned.
@@ -47,17 +56,19 @@ export class TaskService {
         if (dto.description !== undefined) updateData.description = dto.description;
         if (dto.status !== undefined) updateData.status = dto.status;
         if (dto.priority !== undefined) updateData.priority = dto.priority;
-        if (dto.due_date !== undefined) updateData.due_date = dto.due_date ? new Date(dto.due_date) : null;
+        if (dto.due_date !== undefined)
+            updateData.due_date = dto.due_date ? new Date(dto.due_date) : null;
         if (dto.assignee_id !== undefined) updateData.assigneeId = dto.assignee_id;
 
         const updatedTask = await this.taskRepo.update(id, updateData);
 
-        if (dto.assignee_id) { // If assignee was part of update
+        if (dto.assignee_id) {
+            // If assignee was part of update
             await this.notificationRepo.create({
                 type: 'task_assigned',
                 content: `You have been assigned a new task: "${updatedTask.title}" in project "${updatedTask.project?.name}"`,
                 userId: updatedTask.assigneeId,
-                data: JSON.stringify({ taskId: updatedTask.id, projectId: updatedTask.projectId })
+                data: JSON.stringify({ taskId: updatedTask.id, projectId: updatedTask.projectId }),
             });
         }
 

@@ -1,11 +1,12 @@
-
 import { Request, Response } from 'express';
 import { DisputeService } from '../../application/services/DisputeService';
 
 export class DisputeController {
-    constructor(
-        private disputeService: DisputeService
-    ) { }
+    private disputeService: DisputeService;
+
+    constructor({ disputeService }: { disputeService: DisputeService }) {
+        this.disputeService = disputeService;
+    }
 
     createDispute = async (req: Request, res: Response) => {
         try {

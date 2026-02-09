@@ -6,17 +6,35 @@ import { INotificationRepository } from '../../domain/repositories/INotification
 import { Contract } from '@prisma/client';
 
 export class ContractService {
-    constructor(
-        private contractRepo: IContractRepository,
-        private talentRepo: ITalentRepository,
-        private agencyRepo: IAgencyRepository,
-        private projectRepo: IProjectRepository,
-        private notificationRepo: INotificationRepository
-    ) { }
+    private contractRepo: IContractRepository;
+    private talentRepo: ITalentRepository;
+    private agencyRepo: IAgencyRepository;
+    private projectRepo: IProjectRepository;
+    private notificationRepo: INotificationRepository;
+
+    constructor({
+        contractRepo,
+        talentRepo,
+        agencyRepo,
+        projectRepo,
+        notificationRepo,
+    }: {
+        contractRepo: IContractRepository;
+        talentRepo: ITalentRepository;
+        agencyRepo: IAgencyRepository;
+        projectRepo: IProjectRepository;
+        notificationRepo: INotificationRepository;
+    }) {
+        this.contractRepo = contractRepo;
+        this.talentRepo = talentRepo;
+        this.agencyRepo = agencyRepo;
+        this.projectRepo = projectRepo;
+        this.notificationRepo = notificationRepo;
+    }
 
     async createContract(userId: string, data: any): Promise<Contract> {
         // Auto-link talent/agency from project if not provided
-        if (data.projectId && (!data.talentId && !data.agencyId)) {
+        if (data.projectId && !data.talentId && !data.agencyId) {
             const project = await this.projectRepo.findById(data.projectId);
             if (project) {
                 // Try primary assignment first
@@ -33,7 +51,7 @@ export class ContractService {
         return this.contractRepo.create({
             ...data,
             status: 'draft',
-            clientId: userId
+            clientId: userId,
         });
     }
 
@@ -61,17 +79,19 @@ export class ContractService {
             // Check if user is the assigned talent or agency
             const [talent, agency] = await Promise.all([
                 this.talentRepo.findByUserId(userId),
-                this.agencyRepo.findByUserId(userId)
+                this.agencyRepo.findByUserId(userId),
             ]);
 
-            const isAssignedTalent = talent && (talent.id === contract.talentId);
-            const isAssignedAgency = agency && (agency.id === contract.agencyId);
+            const isAssignedTalent = talent && talent.id === contract.talentId;
+            const isAssignedAgency = agency && agency.id === contract.agencyId;
 
             let isProjectMember = false;
             if (!isAssignedTalent && !isAssignedAgency) {
                 const project = await this.projectRepo.findById(contract.projectId);
                 if (project && project.memberships) {
-                    isProjectMember = project.memberships.some((m: any) => m.talentId === talent?.id);
+                    isProjectMember = project.memberships.some(
+                        (m: any) => m.talentId === talent?.id
+                    );
                 }
             }
 
@@ -102,7 +122,7 @@ export class ContractService {
                     type: 'contract_active',
                     content: `Contract "${contract.title}" for project "${project.name}" is now fully signed and active.`,
                     userId: contract.clientId,
-                    data: JSON.stringify({ projectId: project.id, contractId: contract.id })
+                    data: JSON.stringify({ projectId: project.id, contractId: contract.id }),
                 });
 
                 // Notify Talent
@@ -113,7 +133,10 @@ export class ContractService {
                             type: 'contract_active',
                             content: `Contract "${contract.title}" for project "${project.name}" is now fully signed and active.`,
                             userId: talent.userId,
-                            data: JSON.stringify({ projectId: project.id, contractId: contract.id })
+                            data: JSON.stringify({
+                                projectId: project.id,
+                                contractId: contract.id,
+                            }),
                         });
                     }
                 }

@@ -4,7 +4,11 @@ import { CreateMessageSchema } from '../../application/dtos/MessageDTO';
 import { AuthRequest } from '../middleware/AuthMiddleware';
 
 export class MessageController {
-    constructor(private messageService: MessageService) { }
+    private messageService: MessageService;
+
+    constructor({ messageService }: { messageService: MessageService }) {
+        this.messageService = messageService;
+    }
 
     listMessages = async (req: AuthRequest, res: Response) => {
         try {
@@ -18,7 +22,7 @@ export class MessageController {
             console.error('List Messages Error:', error);
             res.status(500).json({
                 message: error.message || 'Error listing messages',
-                stack: error.stack
+                stack: error.stack,
             });
         }
     };
@@ -39,7 +43,7 @@ export class MessageController {
             console.error('Create Message Error:', error);
             res.status(500).json({
                 message: error.message || 'Error creating message',
-                stack: error.stack
+                stack: error.stack,
             });
         }
     };
@@ -52,20 +56,24 @@ export class MessageController {
             console.error('Get Unread Count Error:', error);
             res.status(500).json({
                 message: error.message || 'Error getting unread counts',
-                stack: error.stack
+                stack: error.stack,
             });
         }
     };
 
     markAsRead = async (req: AuthRequest, res: Response) => {
         try {
-            const result = await this.messageService.markAsRead(req.user!.id, req.user!.role, req.body);
+            const result = await this.messageService.markAsRead(
+                req.user!.id,
+                req.user!.role,
+                req.body
+            );
             res.json(result);
         } catch (error: any) {
             console.error('Mark As Read Error:', error);
             res.status(500).json({
                 message: error.message || 'Error marking as read',
-                stack: error.stack
+                stack: error.stack,
             });
         }
     };

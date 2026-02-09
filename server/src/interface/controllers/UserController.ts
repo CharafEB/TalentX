@@ -4,7 +4,11 @@ import { UpdateUserSchema } from '../../application/dtos/UserDTO';
 import { AuthRequest } from '../middleware/AuthMiddleware';
 
 export class UserController {
-    constructor(private userService: UserService) { }
+    private userService: UserService;
+
+    constructor({ userService }: { userService: UserService }) {
+        this.userService = userService;
+    }
 
     getAllUsers = async (req: Request, res: Response) => {
         try {
@@ -40,7 +44,11 @@ export class UserController {
                 return res.status(400).json({ errors: (validationResult.error as any).errors });
             }
 
-            const updatedUser = await this.userService.updateUser(req.user!.id, req.params.id, validationResult.data);
+            const updatedUser = await this.userService.updateUser(
+                req.user!.id,
+                req.params.id,
+                validationResult.data
+            );
             res.json(updatedUser);
         } catch (error: any) {
             res.status(500).json({ message: error.message || 'Error updating user' });

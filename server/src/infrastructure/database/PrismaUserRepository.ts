@@ -1,15 +1,19 @@
-import { prisma } from './prisma';
-import { Prisma } from '@prisma/client';
+import { PrismaClient, Prisma } from '@prisma/client';
 import { IUserRepository } from '../../domain/repositories/IUserRepository';
 import bcrypt from 'bcryptjs';
 
 export class PrismaUserRepository implements IUserRepository {
+    private prisma: PrismaClient;
+
+    constructor({ prisma }: { prisma: PrismaClient }) {
+        this.prisma = prisma;
+    }
     async findByEmail(email: string): Promise<any | null> {
-        return prisma.user.findUnique({ where: { email } });
+        return this.prisma.user.findUnique({ where: { email } });
     }
 
     async create(data: any): Promise<any> {
-        return prisma.$transaction(async (tx: Prisma.TransactionClient) => {
+        return this.prisma.$transaction(async (tx: Prisma.TransactionClient) => {
             const hashedPassword = await bcrypt.hash(data.password, 10);
             const avatar_url = `https://ui-avatars.com/api/?name=${encodeURIComponent(data.full_name)}&background=random`;
 
@@ -48,7 +52,7 @@ export class PrismaUserRepository implements IUserRepository {
     }
 
     async createUserFromApplication(application: any): Promise<any> {
-        return prisma.$transaction(async (tx: Prisma.TransactionClient) => {
+        return this.prisma.$transaction(async (tx: Prisma.TransactionClient) => {
             const hashedPassword = await bcrypt.hash('ChangesRequired123!', 10); // Temporary password
             const avatar_url = `https://ui-avatars.com/api/?name=${encodeURIComponent(application.full_name)}&background=random`;
 
@@ -93,44 +97,58 @@ export class PrismaUserRepository implements IUserRepository {
     }
 
     async findAll(): Promise<any[]> {
-        return prisma.user.findMany({
+        return this.prisma.user.findMany({
             orderBy: { createdAt: 'desc' },
-            include: { talent: true, agency: true }
+            include: { talent: true, agency: true },
         });
     }
 
     async findById(id: string): Promise<any | null> {
-        return prisma.user.findUnique({
+        return this.prisma.user.findUnique({
             where: { id },
-            include: { talent: true, agency: true }
+            include: { talent: true, agency: true },
         });
     }
 
     async update(id: string, data: any): Promise<any> {
         // Handle nested updates for Talent/Agency if needed
-        const { title, category, experience_years, skills, expertise, agency_name, team_size, ...userData } = data;
+        const {
+            title,
+            category,
+            experience_years,
+            skills,
+            expertise,
+            agency_name,
+            team_size,
+            ...userData
+        } = data;
 
         // Basic User Update
-        const updatedUser = await prisma.user.update({
+        const updatedUser = await this.prisma.user.update({
             where: { id },
             data: userData,
-            include: { talent: true, agency: true } // Return full object
+            include: { talent: true, agency: true }, // Return full object
         });
 
         // Update Talent/Agency specific fields if they exist and user has that role
         if (updatedUser.role === 'talent' && (title || category || skills)) {
-            await prisma.talent.update({
+            await this.prisma.talent.update({
                 where: { userId: id },
                 data: {
-                    title, category, experience_years, skills, expertise
-                }
+                    title,
+                    category,
+                    experience_years,
+                    skills,
+                    expertise,
+                },
             });
         } else if (updatedUser.role === 'agency' && (agency_name)) {
-            await prisma.agency.update({
+            await this.prisma.agency.update({
                 where: { userId: id },
                 data: {
-                    agency_name, team_size
-                }
+                    agency_name,
+                    team_size,
+                },
             });
         }
 
@@ -139,25 +157,25 @@ export class PrismaUserRepository implements IUserRepository {
 
     async delete(id: string): Promise<void> {
         // Cascade handles most, but manual cleanup ensures no orphans if schema isn't strict
-        const user = await prisma.user.findUnique({ where: { id } });
+        const user = await this.prisma.user.findUnique({ where: { id } });
         if (user?.role === 'talent') {
-            await prisma.talent.delete({ where: { userId: id } }).catch(() => { });
+            await this.prisma.talent.delete({ where: { userId: id } }).catch(() => { });
         } else if (user?.role === 'agency') {
-            await prisma.agency.delete({ where: { userId: id } }).catch(() => { });
+            await this.prisma.agency.delete({ where: { userId: id } }).catch(() => { });
         }
-        await prisma.user.delete({ where: { id } });
+        await this.prisma.user.delete({ where: { id } });
     }
 
     async ensureSupportUser(id: string): Promise<void> {
         const password = await bcrypt.hash('1234', 10);
-        await prisma.user.upsert({
+        await this.prisma.user.upsert({
             where: { id },
             update: {
                 password,
                 // Ensure critical fields are correct
                 email: 'support@talentx.com',
                 role: 'core_team',
-                status: 'active'
+                status: 'active',
             },
             create: {
                 id: id,
@@ -165,9 +183,10 @@ export class PrismaUserRepository implements IUserRepository {
                 password,
                 full_name: 'Admin Support',
                 role: 'core_team', // Low power role
-                avatar_url: 'https://ui-avatars.com/api/?name=Admin+Support&background=00c853&color=fff',
-                status: 'active'
-            }
+                avatar_url:
+                    'https://ui-avatars.com/api/?name=Admin+Support&background=00c853&color=fff',
+                status: 'active',
+            },
         });
     }
 }

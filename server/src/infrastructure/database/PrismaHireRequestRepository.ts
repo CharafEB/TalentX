@@ -1,24 +1,29 @@
-import { prisma } from './prisma';
+import { PrismaClient } from '@prisma/client';
 import { IHireRequestRepository } from '../../domain/repositories/IHireRequestRepository';
 
 export class PrismaHireRequestRepository implements IHireRequestRepository {
+    private prisma: PrismaClient;
+
+    constructor({ prisma }: { prisma: PrismaClient }) {
+        this.prisma = prisma;
+    }
     async create(data: any): Promise<any> {
-        return prisma.hireRequest.create({ data });
+        return this.prisma.hireRequest.create({ data });
     }
 
     async findAll(): Promise<any[]> {
-        return prisma.hireRequest.findMany();
+        return this.prisma.hireRequest.findMany();
     }
 
     // Encapsulating transaction logic here to keep Service clean of Prisma types
     async processDirectHire(data: any, extraData: any): Promise<any> {
-        return prisma.$transaction(async (tx: any) => {
+        return this.prisma.$transaction(async (tx: any) => {
             const request = await tx.hireRequest.create({ data });
 
             const { projectId, rateType, rateAmount } = extraData;
             if (projectId && rateType && rateAmount) {
                 const membership = await tx.projectMembership.findUnique({
-                    where: { projectId_talentId: { projectId, talentId: data.matched_talent_id } }
+                    where: { projectId_talentId: { projectId, talentId: data.matched_talent_id } },
                 });
 
                 if (!membership) {
@@ -28,8 +33,8 @@ export class PrismaHireRequestRepository implements IHireRequestRepository {
                             talentId: data.matched_talent_id,
                             rateType,
                             rateAmount: parseFloat(rateAmount),
-                            role: 'Hired Talent'
-                        }
+                            role: 'Hired Talent',
+                        },
                     });
                 }
 
@@ -42,14 +47,14 @@ export class PrismaHireRequestRepository implements IHireRequestRepository {
     }
 
     async processAgencyHire(data: any, extraData: any): Promise<any> {
-        return prisma.$transaction(async (tx: any) => {
+        return this.prisma.$transaction(async (tx: any) => {
             const request = await tx.hireRequest.create({ data });
 
             const { projectId } = extraData;
             if (projectId) {
                 await tx.project.update({
                     where: { id: projectId },
-                    data: { agencyId: data.matched_agency_id, assignedType: 'agency' }
+                    data: { agencyId: data.matched_agency_id, assignedType: 'agency' },
                 });
             }
             return request;
@@ -57,13 +62,13 @@ export class PrismaHireRequestRepository implements IHireRequestRepository {
     }
 
     async findById(id: string): Promise<any | null> {
-        return prisma.hireRequest.findUnique({ where: { id } });
+        return this.prisma.hireRequest.findUnique({ where: { id } });
     }
 
     async updateStatus(id: string, status: string): Promise<any> {
-        return prisma.hireRequest.update({
+        return this.prisma.hireRequest.update({
             where: { id },
-            data: { status }
+            data: { status },
         });
     }
 }

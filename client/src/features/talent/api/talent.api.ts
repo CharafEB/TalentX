@@ -1,6 +1,5 @@
-import { apiClient } from "@/shared/api/client";
-import { Talent } from "@/entities/talent/model/types";
-import { normalizeTalent, normalizeTalents } from '../lib/normalizeTalent';
+import { apiClient } from '@/shared/api/client';
+import { Talent } from '@/entities/talent/model/types';
 
 export interface TalentFilters {
     skill?: string;
@@ -17,6 +16,10 @@ export const talentApi = {
 
     getById: async (id: string): Promise<Talent> => {
         const response = await apiClient.get<Talent>(`/talents/${id}`);
-        return normalizeTalent(response.data);
-    }
+        const talent = response.data;
+        return {
+            ...talent,
+            skills: typeof talent.skills === 'string' ? JSON.parse(talent.skills) : talent.skills,
+        };
+    },
 };
