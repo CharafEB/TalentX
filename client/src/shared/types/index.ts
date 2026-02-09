@@ -78,7 +78,13 @@ export interface Talent {
     id?: string;
     full_name: string;
     title: string;
-    category: 'developer' | 'designer' | 'marketing' | 'finance' | 'product_manager' | 'project_manager';
+    category:
+        | 'developer'
+        | 'designer'
+        | 'marketing'
+        | 'finance'
+        | 'product_manager'
+        | 'project_manager';
     expertise?: string[];
     hourly_rate?: number;
     experience_years?: number;
@@ -98,7 +104,14 @@ export interface Team {
     id?: string;
     team_name: string;
     description?: string;
-    specialization: 'full_stack_development' | 'mobile_development' | 'design_team' | 'marketing_team' | 'data_science' | 'devops' | 'ai_ml';
+    specialization:
+        | 'full_stack_development'
+        | 'mobile_development'
+        | 'design_team'
+        | 'marketing_team'
+        | 'data_science'
+        | 'devops'
+        | 'ai_ml';
     team_size: number;
     hourly_rate?: number;
     members?: {
@@ -253,4 +266,3 @@ export interface Dispute {
     initiator?: User;
     admin?: User;
 }
-

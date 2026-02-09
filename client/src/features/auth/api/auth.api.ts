@@ -1,5 +1,5 @@
-import { apiClient } from "@/shared/api/client";
-import { User, LoginCredentials, RegisterData, AuthResponse } from "./types";
+import { apiClient } from '@/shared/api/client';
+import { User, LoginCredentials, RegisterData, AuthResponse } from './types';
 
 export const authApi = {
     login: async (credentials: LoginCredentials): Promise<AuthResponse> => {
@@ -24,5 +24,5 @@ export const authApi = {
     logout: async (): Promise<void> => {
         // Optional: Call backend to invalidate token if needed
         // await apiClient.post('/auth/logout');
-    }
+    },
 };

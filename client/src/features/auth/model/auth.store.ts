@@ -23,7 +23,7 @@ export const useAuthStore = create<AuthState>()(
                 } catch (error: any) {
                     set({
                         error: error.response?.data?.message || 'Login failed',
-                        isLoading: false
+                        isLoading: false,
                     });
                     throw error;
                 }
@@ -38,7 +38,7 @@ export const useAuthStore = create<AuthState>()(
                 } catch (error: any) {
                     set({
                         error: error.response?.data?.message || 'Registration failed',
-                        isLoading: false
+                        isLoading: false,
                     });
                     throw error;
                 }
@@ -61,11 +61,15 @@ export const useAuthStore = create<AuthState>()(
                     set({ user: null, token: null, isAuthenticated: false, isLoading: false });
                     localStorage.removeItem('talentx_token');
                 }
-            }
+            },
         }),
         {
             name: 'auth-storage',
-            partialize: (state) => ({ user: state.user, token: state.token, isAuthenticated: state.isAuthenticated }),
+            partialize: (state) => ({
+                user: state.user,
+                token: state.token,
+                isAuthenticated: state.isAuthenticated,
+            }),
         }
     )
 );
