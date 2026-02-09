@@ -97,8 +97,9 @@ export const talentXApi = {
             },
             hire: async (data: HireTeamInput): Promise<any> => {
                 // Transform HireTeamInput to backend format
+                // Extract real talent IDs from the team members
                 const backendData = {
-                    talentIds: [data.teamId], // Backend expects array of talent IDs
+                    talentIds: data.talentIds || [], // Use the talentIds array directly
                     projectId: data.projectId || '', // Ensure projectId is provided
                     ...(data.startDate && { startDate: data.startDate })
                 };
