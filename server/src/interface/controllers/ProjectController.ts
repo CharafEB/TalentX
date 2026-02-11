@@ -1,6 +1,12 @@
 import { Request, Response, NextFunction } from 'express';
 import { ProjectService } from '../../application/services/ProjectService';
-import { CreateProjectSchema, UpdateProjectSchema, RecordPaymentSchema, CompleteProjectSchema, ReleasePaymentSchema } from '../../application/dtos/ProjectDTO';
+import {
+    CreateProjectSchema,
+    UpdateProjectSchema,
+    RecordPaymentSchema,
+    CompleteProjectSchema,
+    ReleasePaymentSchema,
+} from '../../application/dtos/ProjectDTO';
 import { AuthRequest } from '../middleware/AuthMiddleware';
 import { ErrorApp } from '../../infrastructure/ErrorApp';
 
@@ -41,7 +47,7 @@ export class ProjectController {
             const body = {
                 ...req.body,
                 clientId: req.body.clientId || req.user?.id,
-                client_email: req.body.client_email || req.user?.email
+                client_email: req.body.client_email || req.user?.email,
             };
 
             const validation = CreateProjectSchema.safeParse(body);
@@ -153,7 +159,11 @@ export class ProjectController {
             if (!validation.success) {
                 return next(new ErrorApp("Validation Error", 400, JSON.stringify(validation.error.issues)));
             }
-            const project = await this.projectService.updateProject(req.user!.id, req.params.id, validation.data);
+            const project = await this.projectService.updateProject(
+                req.user!.id,
+                req.params.id,
+                validation.data
+            );
             res.json(project);
         } catch (error: any) {
             next(error);
@@ -272,7 +282,11 @@ export class ProjectController {
             if (!validation.success) {
                 return next(new ErrorApp("Validation Error", 400, JSON.stringify(validation.error.issues)));
             }
-            const project = await this.projectService.completeProject(req.user!.id, req.params.id, validation.data);
+            const project = await this.projectService.completeProject(
+                req.user!.id,
+                req.params.id,
+                validation.data
+            );
             res.json(project);
         } catch (error: any) {
             next(error);

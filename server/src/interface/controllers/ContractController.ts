@@ -20,7 +20,9 @@ export class ContractController {
 
     getContractsByProject = async (req: Request, res: Response, next: NextFunction) => {
         try {
-            const contracts = await this.contractService.getContractsByProject(req.params.projectId);
+            const contracts = await this.contractService.getContractsByProject(
+                req.params.projectId
+            );
             res.json(contracts);
         } catch (error: any) {
             next(error);
@@ -33,7 +35,11 @@ export class ContractController {
             if (!signature) {
                 return next(new ErrorApp('Signature is required', 400));
             }
-            const contract = await this.contractService.signContract(req.params.id, req.user!.id, signature);
+            const contract = await this.contractService.signContract(
+                req.params.id,
+                req.user!.id,
+                signature
+            );
             res.json(contract);
         } catch (error: any) {
             next(error);

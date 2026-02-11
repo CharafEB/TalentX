@@ -125,7 +125,11 @@ export class UserController {
                 return next(new ErrorApp("Validation Error", 400, JSON.stringify(validationResult.error.issues)));
             }
 
-            const updatedUser = await this.userService.updateUser(req.user!.id, req.params.id, validationResult.data);
+            const updatedUser = await this.userService.updateUser(
+                req.user!.id,
+                req.params.id,
+                validationResult.data
+            );
             res.json(updatedUser);
         } catch (error: any) {
             next(error);

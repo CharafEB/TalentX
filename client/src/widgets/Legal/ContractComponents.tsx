@@ -1,20 +1,20 @@
 import React, { useState, useEffect } from 'react';
-import { Card, CardHeader, CardTitle, CardContent } from "@/shared/components/ui/card";
-import { Button } from "@/shared/components/ui/button";
-import { Input } from "@/shared/components/ui/input";
-import { Label } from "@/shared/components/ui/label";
-import { Textarea } from "@/shared/components/ui/textarea";
-import { Badge } from "@/shared/components/ui/badge";
+import { Card, CardHeader, CardTitle, CardContent } from '@/shared/components/ui/card';
+import { Button } from '@/shared/components/ui/button';
+import { Input } from '@/shared/components/ui/input';
+import { Label } from '@/shared/components/ui/label';
+import { Textarea } from '@/shared/components/ui/textarea';
+import { Badge } from '@/shared/components/ui/badge';
 import { talentXApi } from '@/shared/api/talentXApi';
 import { Contract } from '@/shared/types';
 import { FileText, CheckCircle, PenTool, XCircle } from 'lucide-react';
-import { useToast } from "@/shared/components/ui/use-toast";
+import { useToast } from '@/shared/components/ui/use-toast';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Clock, Plus, X, Shield, ScrollText, Signature } from 'lucide-react';
 import { toast } from 'sonner';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { User } from '@/shared/types';
-import { jsPDF } from "jspdf";
+import { jsPDF } from 'jspdf';
 import { Download } from 'lucide-react';
 
 interface ContractsListProps {
@@ -62,50 +62,52 @@ This Agreement shall commence on the date of execution and shall continue until 
 `;
 
 const templates = [
-    { id: 'NDA', name: 'Non-Disclosure Agreement', desc: 'Protect sensitive information shared during the project.', content: NDA_TEMPLATE },
-    { id: 'MSA', name: 'Master Services Agreement', desc: 'Outline the general terms for services provided.', content: MSA_TEMPLATE },
+    {
+        id: 'NDA',
+        name: 'Non-Disclosure Agreement',
+        desc: 'Protect sensitive information shared during the project.',
+        content: NDA_TEMPLATE,
+    },
+    {
+        id: 'MSA',
+        name: 'Master Services Agreement',
+        desc: 'Outline the general terms for services provided.',
+        content: MSA_TEMPLATE,
+    },
 ];
 
-function CustomContractModal({ isOpen, onClose, contract, projectId, currentUser, onSuccess }: CustomContractModalProps) {
+function CustomContractModal({
+    isOpen,
+    onClose,
+    contract,
+    projectId,
+    currentUser,
+    onSuccess,
+}: CustomContractModalProps) {
     const queryClient = useQueryClient();
-    const [type, setType] = useState<'NDA' | 'MSA'>(contract?.type as 'NDA' | 'MSA' || 'NDA');
-    const [content, setContent] = useState(contract?.content || templates[0].content);
+    const [type, setType] = useState<'NDA' | 'MSA'>(() => {
+        if (contract?.type === 'MSA') return 'MSA';
+        return 'NDA';
+    });
+    const [content, setContent] = useState(() => contract?.content || templates[0].content);
     const [signerName, setSignerName] = useState('');
 
-    useEffect(() => {
-        if (isOpen && !contract) {
-            // Reset for new contract creation
-            setType('NDA');
-            setContent(templates[0].content);
-            setSignerName('');
-        } else if (isOpen && contract) {
-            // For viewing/signing existing contract
-            setType(contract.type as 'NDA' | 'MSA');
-            setContent(contract.content);
-            setSignerName('');
-        }
-    }, [isOpen, contract]);
-
-    useEffect(() => {
-        if (!contract) { // Only update content if creating a new contract
-            const selectedTemplate = templates.find(t => t.id === type);
-            if (selectedTemplate) {
-                setContent(selectedTemplate.content);
-            }
-        }
-    }, [type, contract]);
-
     const createMutation = useMutation({
-        mutationFn: (newContractData: { projectId: string; type: 'NDA' | 'MSA'; title: string; content: string; clientId: string }) =>
-            talentXApi.Legal.Contracts.create(newContractData),
+        mutationFn: (newContractData: {
+            projectId: string;
+            type: 'NDA' | 'MSA';
+            title: string;
+            content: string;
+            clientId: string;
+        }) => talentXApi.Legal.Contracts.create(newContractData),
         onSuccess: () => {
-            toast.success("Contract created successfully!");
+            toast.success('Contract created successfully!');
             queryClient.invalidateQueries({ queryKey: ['contracts', projectId] });
             onSuccess();
             onClose();
         },
         onError: (error: any) => {
-            toast.error("Failed to create contract", { description: error.message });
+            toast.error('Failed to create contract', { description: error.message });
         },
     });
 
@@ -113,20 +115,20 @@ function CustomContractModal({ isOpen, onClose, contract, projectId, currentUser
         mutationFn: (data: { contractId: string; signature: string }) =>
             talentXApi.Legal.Contracts.sign(data.contractId, data.signature),
         onSuccess: () => {
-            toast.success("Contract signed successfully!");
+            toast.success('Contract signed successfully!');
             queryClient.invalidateQueries({ queryKey: ['contracts', projectId] });
             onSuccess();
             onClose();
         },
         onError: (error: any) => {
-            toast.error("Failed to sign contract", { description: error.message });
+            toast.error('Failed to sign contract', { description: error.message });
         },
     });
 
     const handleCreateContract = () => {
-        const selectedTemplate = templates.find(t => t.id === type);
+        const selectedTemplate = templates.find((t) => t.id === type);
         if (!selectedTemplate) {
-            toast.error("Please select a contract type.");
+            toast.error('Please select a contract type.');
             return;
         }
         createMutation.mutate({
@@ -141,7 +143,7 @@ function CustomContractModal({ isOpen, onClose, contract, projectId, currentUser
     const handleSignContract = () => {
         if (!contract) return;
         if (!signerName.trim()) {
-            toast.error("Please type your full name to sign.");
+            toast.error('Please type your full name to sign.');
             return;
         }
         signMutation.mutate({ contractId: contract.id, signature: signerName });
@@ -162,7 +164,7 @@ function CustomContractModal({ isOpen, onClose, contract, projectId, currentUser
         const splitText = doc.splitTextToSize(contract.content, 170);
         doc.text(splitText, 20, 60);
 
-        let y = doc.internal.pageSize.height - 40;
+        const y = doc.internal.pageSize.height - 40;
 
         if (contract.clientSignature) {
             doc.text(`Client Signature: ${contract.clientSignature}`, 20, y);
@@ -171,11 +173,15 @@ function CustomContractModal({ isOpen, onClose, contract, projectId, currentUser
 
         if (contract.contractorSignature) {
             doc.text(`Contractor Signature: ${contract.contractorSignature}`, 120, y);
-            doc.text(`Date: ${new Date(contract.contractorSignedAt!).toLocaleDateString()}`, 120, y + 5);
+            doc.text(
+                `Date: ${new Date(contract.contractorSignedAt!).toLocaleDateString()}`,
+                120,
+                y + 5
+            );
         }
 
         doc.save(`${contract.title.replace(/\s+/g, '_')}_${contract.id.substring(0, 8)}.pdf`);
-        toast.success("PDF Downloaded");
+        toast.success('PDF Downloaded');
     };
 
     const canSign = (contract: Contract) => {
@@ -209,13 +215,23 @@ function CustomContractModal({ isOpen, onClose, contract, projectId, currentUser
                                     {contract ? contract.title : 'New Contract'}
                                 </h3>
                                 {contract && (
-                                    <Button variant="outline" size="sm" onClick={handleDownload} className="ml-4 rounded-xl">
-                                        <Download className="w-4 h-4 mr-2" />
+                                    <Button
+                                        variant="outline"
+                                        size="sm"
+                                        onClick={handleDownload}
+                                        className="ml-4 bg-white rounded-xl"
+                                    >
+                                        <Download className="w-4 h-4 mr-2 bg-white" />
                                         Download PDF
                                     </Button>
                                 )}
                             </div>
-                            <Button variant="ghost" size="icon" onClick={onClose} className="rounded-full">
+                            <Button
+                                variant="ghost"
+                                size="icon"
+                                onClick={onClose}
+                                className="rounded-full"
+                            >
                                 <X className="w-5 h-5" />
                             </Button>
                         </div>
@@ -225,27 +241,39 @@ function CustomContractModal({ isOpen, onClose, contract, projectId, currentUser
                                 <div className="space-y-4">
                                     <h4 className="font-bold text-gray-700">Select Template</h4>
                                     <div className="grid md:grid-cols-2 gap-4">
-                                        {templates.map(t => (
+                                        {templates.map((t) => (
                                             <button
                                                 key={t.id}
-                                                onClick={() => setType(t.id as any)}
+                                                onClick={() => {
+                                                    const nextType = t.id === 'MSA' ? 'MSA' : 'NDA';
+                                                    setType(nextType);
+                                                    setContent(t.content);
+                                                }}
                                                 className={`p-6 rounded-2xl border-2 transition-all text-left group ${type === t.id
                                                     ? 'border-blue-500 bg-blue-50/50'
                                                     : 'border-gray-100 hover:border-blue-200 hover:bg-gray-50'
                                                     }`}
                                             >
                                                 <div className="flex items-center gap-3 mb-2">
-                                                    <div className={`p-2 rounded-lg ${type === t.id ? 'bg-blue-500 text-white' : 'bg-gray-100 text-gray-400 group-hover:text-blue-500 group-hover:bg-blue-50'}`}>
+                                                    <div
+                                                        className={`p-2 rounded-lg ${type === t.id ? 'bg-blue-500 text-white' : 'bg-gray-100 text-gray-400 group-hover:text-blue-500 group-hover:bg-blue-50'}`}
+                                                    >
                                                         <FileText className="w-5 h-5" />
                                                     </div>
-                                                    <span className="font-bold text-gray-900">{t.name}</span>
+                                                    <span className="font-bold text-gray-900">
+                                                        {t.name}
+                                                    </span>
                                                 </div>
-                                                <p className="text-sm text-gray-500 leading-relaxed">{t.desc}</p>
+                                                <p className="text-sm text-gray-500 leading-relaxed">
+                                                    {t.desc}
+                                                </p>
                                             </button>
                                         ))}
                                     </div>
                                     <div className="pt-4">
-                                        <label className="block text-sm font-bold text-gray-700 mb-2">Contract Content</label>
+                                        <label className="block text-sm font-bold text-gray-700 mb-2">
+                                            Contract Content
+                                        </label>
                                         <textarea
                                             value={content}
                                             onChange={(e) => setContent(e.target.value)}
@@ -273,7 +301,9 @@ function CustomContractModal({ isOpen, onClose, contract, projectId, currentUser
                                             )}
                                         </div>
                                         <div className="border p-3 rounded">
-                                            <p className="font-semibold mb-1">Talent/Agency Signature</p>
+                                            <p className="font-semibold mb-1">
+                                                Talent/Agency Signature
+                                            </p>
                                             {contract?.contractorSignature ? (
                                                 <div className="text-green-600 flex items-center gap-1">
                                                     <CheckCircle className="w-3 h-3" />
@@ -292,13 +322,25 @@ function CustomContractModal({ isOpen, onClose, contract, projectId, currentUser
                                                     <Signature className="w-6 h-6" />
                                                 </div>
                                                 <div>
-                                                    <p className="text-sm font-bold text-green-800">Digitally Signed & Active</p>
-                                                    <p className="text-xs text-green-600">Finalized on {new Date(contract.updatedAt || contract.createdAt!).toLocaleDateString()}</p>
+                                                    <p className="text-sm font-bold text-green-800">
+                                                        Digitally Signed & Active
+                                                    </p>
+                                                    <p className="text-xs text-green-600">
+                                                        Finalized on{' '}
+                                                        {new Date(
+                                                            contract.updatedAt ||
+                                                                contract.createdAt!
+                                                        ).toLocaleDateString()}
+                                                    </p>
                                                 </div>
                                             </div>
                                             <div className="text-right">
-                                                <p className="text-xs font-bold text-green-800 uppercase tracking-widest">Status</p>
-                                                <p className="font-serif italic font-medium text-green-900">Enforceable Agreement</p>
+                                                <p className="text-xs font-bold text-green-800 uppercase tracking-widest">
+                                                    Status
+                                                </p>
+                                                <p className="font-serif italic font-medium text-green-900">
+                                                    Enforceable Agreement
+                                                </p>
                                             </div>
                                         </div>
                                     )}
@@ -306,8 +348,12 @@ function CustomContractModal({ isOpen, onClose, contract, projectId, currentUser
                             )}
                         </div>
 
-                        <div className="p-6 border-t border-gray-100 flex justify-end gap-3 bg-gray-50/30">
-                            <Button variant="outline" onClick={onClose} className="rounded-xl px-6">
+                        <div className="p-6 border-t border-gray-100 flex flex-col lg:flex-row justify-end gap-3 ">
+                            <Button
+                                variant="outline"
+                                onClick={onClose}
+                                className="rounded-xl hidden lg:visible bg-white px-6"
+                            >
                                 Close
                             </Button>
                             {!contract && (
@@ -316,7 +362,9 @@ function CustomContractModal({ isOpen, onClose, contract, projectId, currentUser
                                     disabled={createMutation.isPending}
                                     className="bg-blue-600 hover:bg-blue-700 text-white rounded-xl px-8"
                                 >
-                                    {createMutation.isPending ? 'Generating...' : 'Generate Contract'}
+                                    {createMutation.isPending
+                                        ? 'Generating...'
+                                        : 'Generate Contract'}
                                 </Button>
                             )}
                             {contract && canSign(contract) && (
@@ -345,7 +393,6 @@ function CustomContractModal({ isOpen, onClose, contract, projectId, currentUser
     );
 }
 
-
 export function ContractsList({ projectId, currentUser }: ContractsListProps) {
     const [contracts, setContracts] = useState<Contract[]>([]);
     const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
@@ -353,33 +400,39 @@ export function ContractsList({ projectId, currentUser }: ContractsListProps) {
     const [selectedContract, setSelectedContract] = useState<Contract | null>(null);
     // const { toast } = useToast(); // Removed as sonner is used in CustomContractModal
 
-    useEffect(() => {
-        loadContracts();
-    }, [projectId]);
-
     const loadContracts = async () => {
         try {
             const data = await talentXApi.Legal.Contracts.listByProject(projectId);
             setContracts(data);
         } catch (error) {
-            console.error("Failed to load contracts", error);
-            toast.error("Failed to load contracts", { description: (error as Error).message });
+            console.error('Failed to load contracts', error);
+            toast.error('Failed to load contracts', { description: (error as Error).message });
         }
     };
 
+    useEffect(() => {
+        loadContracts();
+    }, [projectId]);
+
     const getStatusBadge = (status: string) => {
         switch (status) {
-            case 'active': return <Badge className="bg-green-500">Active</Badge>;
-            case 'pending_signature': return <Badge variant="secondary">Pending Signature</Badge>;
-            case 'draft': return <Badge variant="outline">Draft</Badge>;
-            default: return <Badge variant="destructive">{status}</Badge>;
+            case 'active':
+                return <Badge className="bg-green-500">Active</Badge>;
+            case 'pending_signature':
+                return <Badge variant="secondary">Pending Signature</Badge>;
+            case 'draft':
+                return <Badge variant="outline">Draft</Badge>;
+            default:
+                return <Badge variant="destructive">{status}</Badge>;
         }
     };
 
     return (
         <Card>
             <CardHeader className="flex flex-row items-center justify-between pb-2">
-                <CardTitle className="text-lg font-medium">Contracts & Agreements</CardTitle>
+                <CardTitle className="text-lg font-medium text-black">
+                    Contracts & Agreements
+                </CardTitle>
                 {(currentUser.role === 'client' || currentUser.role === 'admin') && (
                     <Button size="sm" onClick={() => setIsCreateModalOpen(true)}>
                         <FileText className="w-4 h-4 mr-2" />
@@ -390,10 +443,15 @@ export function ContractsList({ projectId, currentUser }: ContractsListProps) {
             <CardContent>
                 <div className="space-y-4">
                     {contracts.length === 0 ? (
-                        <p className="text-sm text-gray-500">No active contracts for this project.</p>
+                        <p className="text-sm text-gray-500">
+                            No active contracts for this project.
+                        </p>
                     ) : (
                         contracts.map((contract) => (
-                            <div key={contract.id} className="flex items-center justify-between p-4 border rounded-lg hover:bg-gray-50 transition-colors">
+                            <div
+                                key={contract.id}
+                                className="flex flex-wrap items-center justify-between p-4 border rounded-lg hover:bg-gray-50 transition-colors"
+                            >
                                 <div className="flex items-center gap-3">
                                     <div className="p-2 bg-blue-100 rounded-lg">
                                         <FileText className="w-5 h-5 text-blue-600" />
@@ -403,28 +461,42 @@ export function ContractsList({ projectId, currentUser }: ContractsListProps) {
                                         <p className="text-xs text-gray-500 flex gap-2 mt-1">
                                             <span>Type: {contract.type}</span>
                                             <span>•</span>
-                                            <span>Created: {new Date(contract.createdAt!).toLocaleDateString()}</span>
+                                            <span>
+                                                Created:{' '}
+                                                {new Date(contract.createdAt!).toLocaleDateString()}
+                                            </span>
                                         </p>
                                     </div>
                                 </div>
                                 <div className="flex items-center gap-4">
                                     {getStatusBadge(contract.status)}
-                                    <Button variant="ghost" size="sm" onClick={() => {
-                                        setSelectedContract(contract);
-                                        setIsViewModalOpen(true);
-                                    }}>
+                                    <Button
+                                        variant="ghost"
+                                        size="sm"
+                                        onClick={() => {
+                                            setSelectedContract(contract);
+                                            setIsViewModalOpen(true);
+                                        }}
+                                    >
                                         View
                                     </Button>
-                                    <Button variant="ghost" size="sm" onClick={() => {
-                                        // A quick way to use the download logic from the items
-                                        const doc = new jsPDF();
-                                        doc.setFontSize(20);
-                                        doc.text(contract.title, 20, 20);
-                                        doc.setFontSize(10);
-                                        const splitText = doc.splitTextToSize(contract.content, 170);
-                                        doc.text(splitText, 20, 60);
-                                        doc.save(`${contract.title.replace(/\s+/g, '_')}.pdf`);
-                                    }}>
+                                    <Button
+                                        variant="ghost"
+                                        size="sm"
+                                        onClick={() => {
+                                            // A quick way to use the download logic from the items
+                                            const doc = new jsPDF();
+                                            doc.setFontSize(20);
+                                            doc.text(contract.title, 20, 20);
+                                            doc.setFontSize(10);
+                                            const splitText = doc.splitTextToSize(
+                                                contract.content,
+                                                170
+                                            );
+                                            doc.text(splitText, 20, 60);
+                                            doc.save(`${contract.title.replace(/\s+/g, '_')}.pdf`);
+                                        }}
+                                    >
                                         <Download className="w-4 h-4" />
                                     </Button>
                                 </div>
@@ -436,6 +508,7 @@ export function ContractsList({ projectId, currentUser }: ContractsListProps) {
 
             {/* Create Modal */}
             <CustomContractModal
+                key={`create-${isCreateModalOpen ? 'open' : 'closed'}`}
                 isOpen={isCreateModalOpen}
                 onClose={() => setIsCreateModalOpen(false)}
                 projectId={projectId}
@@ -445,6 +518,7 @@ export function ContractsList({ projectId, currentUser }: ContractsListProps) {
 
             {/* View/Sign Modal */}
             <CustomContractModal
+                key={`view-${isViewModalOpen ? 'open' : 'closed'}-${selectedContract?.id || 'none'}`}
                 isOpen={isViewModalOpen}
                 onClose={() => setIsViewModalOpen(false)}
                 contract={selectedContract}

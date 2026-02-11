@@ -27,9 +27,8 @@ export class ApplicationController {
 
             res.status(201).json({
                 message: 'Application submitted successfully',
-                applicationId: application.id
+                applicationId: application.id,
             });
-
         } catch (error: any) {
             next(error);
         }
@@ -40,7 +39,7 @@ export class ApplicationController {
             const applications = await this.applicationService.getAllApplications();
 
             // Transform for frontend if needed (keeping existing shape logic)
-            const formattedApps = applications.map(app => ({
+            const formattedApps = applications.map((app) => ({
                 id: app.id,
                 userId: null,
                 type: app.role,
@@ -68,7 +67,7 @@ export class ApplicationController {
         } catch (error) {
             next(error);
         }
-    }
+    };
 
     updateStatus = async (req: Request, res: Response, next: NextFunction) => {
         const { id } = req.params;
@@ -79,7 +78,7 @@ export class ApplicationController {
         } catch (error: any) {
             next(error);
         }
-    }
+    };
 
     getSheetUrl = async (req: Request, res: Response, next: NextFunction) => {
         const sheetId = process.env.GOOGLE_SHEET_ID;

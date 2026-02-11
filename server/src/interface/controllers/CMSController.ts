@@ -63,7 +63,11 @@ export class CMSController {
     }
     updateTestimonial = async (req: AuthRequest, res: Response, next: NextFunction) => {
         try {
-            const item = await this.cmsService.updateTestimonial(req.user!.id, req.params.id, req.body);
+            const item = await this.cmsService.updateTestimonial(
+                req.user!.id,
+                req.params.id,
+                req.body
+            );
             res.json(item);
         } catch (error: any) {
             next(error);
@@ -97,7 +101,11 @@ export class CMSController {
     }
     updateCaseStudy = async (req: AuthRequest, res: Response, next: NextFunction) => {
         try {
-            const item = await this.cmsService.updateCaseStudy(req.user!.id, req.params.id, req.body);
+            const item = await this.cmsService.updateCaseStudy(
+                req.user!.id,
+                req.params.id,
+                req.body
+            );
             res.json(item);
         } catch (error: any) {
             next(error);
@@ -131,7 +139,11 @@ export class CMSController {
     }
     updateBlogPost = async (req: AuthRequest, res: Response, next: NextFunction) => {
         try {
-            const item = await this.cmsService.updateBlogPost(req.user!.id, req.params.id, req.body);
+            const item = await this.cmsService.updateBlogPost(
+                req.user!.id,
+                req.params.id,
+                req.body
+            );
             res.json(item);
         } catch (error: any) {
             next(error);

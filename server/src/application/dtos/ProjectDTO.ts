@@ -64,7 +64,7 @@ import { z } from 'zod';
  *           minLength: 10
  */
 export const CreateProjectSchema = z.object({
-    name: z.string().min(1, "Name is required"),
+    name: z.string().min(1, 'Name is required'),
     description: z.string().optional(),
 
     // Admin/Client might pass these, or derived from context
@@ -80,7 +80,7 @@ export const CreateProjectSchema = z.object({
 
     // Assignments (optional at creation)
     talentId: z.string().optional(),
-    agencyId: z.string().optional()
+    agencyId: z.string().optional(),
 });
 
 export const UpdateProjectSchema = CreateProjectSchema.partial();
@@ -88,16 +88,16 @@ export const UpdateProjectSchema = CreateProjectSchema.partial();
 export const RecordPaymentSchema = z.object({
     projectId: z.string(),
     talentId: z.string(),
-    amount: z.number().min(1)
+    amount: z.number().min(1),
 });
 
 export const CompleteProjectSchema = z.object({
     rating: z.number().min(1).max(5),
-    review: z.string().min(10)
+    review: z.string().min(10),
 });
 
 export const ReleasePaymentSchema = z.object({
-    projectId: z.string()
+    projectId: z.string(),
 });
 
 export type CreateProjectDTO = z.infer<typeof CreateProjectSchema>;

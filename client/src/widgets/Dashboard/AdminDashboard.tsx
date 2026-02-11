@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import {
     Table,
     TableBody,
@@ -22,11 +22,13 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { talentXApi, API_URL } from '@/shared/api/talentXApi';
 import Link from 'next/link';
 import { createPageUrl } from '@/shared/lib/utils';
+import { useSmartQuery } from '@/shared/lib/smartQuery';
 import { motion } from 'framer-motion';
 import { MessagesView } from './MessagesView';
 import ProjectDetail from './ProjectDetail';
 import AdminDisputePanel from '../Legal/AdminDisputePanel';
 import { useSearchParams, useRouter } from 'next/navigation';
+import { DashboardSkeleton } from '@/shared/components/ui/skeleton-variants';
 
 // --- Types ---
 interface Application {
@@ -53,15 +55,17 @@ export default function AdminDashboard() {
     const [cmsModalSubmitting, setCmsModalSubmitting] = useState(false);
     const [editingItem, setEditingItem] = useState<any>(null);
     const [cmsFormData, setCmsFormData] = useState<any>({});
-    const [user, setUser] = useState<any>(null);
     const [selectedProject, setSelectedProject] = useState<any>(null);
     const [maintenanceMode, setMaintenanceMode] = useState(false);
     const [platformCommission, setPlatformCommission] = useState(12.0);
     const [automaticVetting, setAutomaticVetting] = useState(false);
 
-    useEffect(() => {
-        talentXApi.auth.me().then(setUser);
-    }, []);
+    // Fetch current user with useQuery to prevent double loading
+    const { data: user, isLoading: isUserLoading } = useQuery({
+        queryKey: ['current-user'],
+        queryFn: () => talentXApi.auth.me(),
+        staleTime: 300000, // 5 minutes - user data rarely changes
+    });
 
 
     // --- Queries ---
@@ -93,41 +97,45 @@ export default function AdminDashboard() {
     // Users (From Legacy Dashboard)
     const { data: allUsers } = useQuery({
         queryKey: ['users'],
-        queryFn: async () => talentXApi.entities.User.list()
+        queryFn: async () => talentXApi.entities.User.list(),
+        staleTime: 30000, // 30 seconds
     });
 
     // Messages (From Legacy Dashboard)
     const { data: messages } = useQuery({
         queryKey: ['messages'],
-        queryFn: async () => talentXApi.entities.Message.list({})
+        queryFn: async () => talentXApi.entities.Message.list({}),
+        staleTime: 30000, // 30 seconds
     });
 
     // Projects
     const { data: projects, refetch: refetchProjects } = useQuery({
         queryKey: ['projects'],
-        queryFn: async () => talentXApi.entities.Project.list()
+        queryFn: async () => talentXApi.entities.Project.list(),
+        staleTime: 30000, // 30 seconds
     });
 
     // Hire Requests
     const { data: hireRequests, refetch: refetchHireRequests } = useQuery({
         queryKey: ['hire-requests'],
-        queryFn: async () => talentXApi.entities.HireRequest.list()
+        queryFn: async () => talentXApi.entities.HireRequest.list(),
+        staleTime: 30000, // 30 seconds
     });
 
     // CMS queries
-    const { data: faqs } = useQuery({
+    const { data: faqs } = useSmartQuery({
         queryKey: ['cms-faqs'],
         queryFn: () => talentXApi.entities.CMS.FAQ.list()
     });
-    const { data: testimonials } = useQuery({
+    const { data: testimonials } = useSmartQuery({
         queryKey: ['cms-testimonials'],
         queryFn: () => talentXApi.entities.CMS.Testimonial.list()
     });
-    const { data: caseStudies } = useQuery({
+    const { data: caseStudies } = useSmartQuery({
         queryKey: ['cms-case-studies'],
         queryFn: () => talentXApi.entities.CMS.CaseStudy.list()
     });
-    const { data: blogPosts } = useQuery({
+    const { data: blogPosts } = useSmartQuery({
         queryKey: ['cms-blog-posts'],
         queryFn: () => talentXApi.entities.CMS.BlogPost.list()
     });
@@ -135,7 +143,8 @@ export default function AdminDashboard() {
     // Analytics
     const { data: analytics } = useQuery({
         queryKey: ['admin-analytics'],
-        queryFn: async () => talentXApi.entities.Admin.getAnalytics()
+        queryFn: async () => talentXApi.entities.Admin.getAnalytics(),
+        staleTime: 60000, // 60 seconds
     });
 
     const [auditFilters, setAuditFilters] = useState({
@@ -148,8 +157,14 @@ export default function AdminDashboard() {
     const { data: auditLogs } = useQuery({
         queryKey: ['audit-logs', auditFilters],
         queryFn: async () => talentXApi.entities.Admin.getAuditLogs(auditFilters),
-        refetchInterval: 30000 // Refresh every 30 seconds
+        refetchInterval: 30000, // Refresh every 30 seconds
+        staleTime: 30000, // 30 seconds
     });
+
+    const totalUnreadNotifications = useMemo(
+        () => (notifications || []).filter((n: any) => !n.isRead).length,
+        [notifications]
+    );
 
     useEffect(() => {
         const projectId = searchParams.get('project');
@@ -242,8 +257,15 @@ export default function AdminDashboard() {
             if (action === 'delete') return api[entityKey].delete(id);
         },
         onSuccess: (_, variables) => {
-            const key = `cms-${variables.type}`;
-            queryClient.invalidateQueries({ queryKey: [key] });
+            const queryKeyRoot =
+                variables.type === 'blog'
+                    ? 'cms-blog-posts'
+                    : variables.type === 'faqs'
+                        ? 'cms-faqs'
+                        : variables.type === 'testimonials'
+                            ? 'cms-testimonials'
+                            : 'cms-case-studies';
+            queryClient.invalidateQueries({ queryKey: [queryKeyRoot] });
             toast({ title: `CMS Entry ${variables.action === 'delete' ? 'deleted' : 'saved'} successfully` });
             setIsCMSModalOpen(false);
             setEditingItem(null);
@@ -449,14 +471,20 @@ export default function AdminDashboard() {
     const { data: unreadCounts } = useQuery({
         queryKey: ['unread-counts'],
         queryFn: async () => talentXApi.entities.Message.getUnreadCount(),
-        refetchInterval: 10000
+        refetchInterval: 10000,
+        staleTime: 10000, // 10 seconds
     });
 
+    // Show skeleton while user data is loading
+    if (isUserLoading || !user) {
+        return <DashboardSkeleton />;
+    }
+
     return (
-        <div className="p-8 space-y-8 bg-gray-50 min-h-screen">
+        <div className="p-8 space-y-8  bg-blue min-h-screen">
 
 
-            {selectedProject && user ? (
+            {selectedProject ? (
                 <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-200">
                     <ProjectDetail
                         user={user}
@@ -468,15 +496,15 @@ export default function AdminDashboard() {
                     />
                 </div>
             ) : (
-                <Tabs key={user?.role || 'loading'} defaultValue={user?.role === 'admin' ? "overview" : "messages"} className="w-full" onValueChange={setActiveTab}>
-                    <TabsList className="flex flex-wrap lg:grid w-full grid-cols-4 lg:grid-cols-10 lg:w-fit mb-8 h-auto p-1 bg-gray-100 rounded-xl">
+                <Tabs key={user?.role} defaultValue={user.role === 'admin' ? "overview" : "messages"} className="w-full" onValueChange={setActiveTab}>
+                    <TabsList className="flex flex-wrap  w-full  gap-4 mb-8 h-auto p-1 bg-gray-100 rounded-xl">
                         {user?.role === 'admin' && (
                             <>
-                                <TabsTrigger value="overview" className="flex-1">Overview</TabsTrigger>
-                                <TabsTrigger value="insights" className="flex-1">Insights</TabsTrigger>
-                                <TabsTrigger value="content" className="flex-1">Content</TabsTrigger>
-                                <TabsTrigger value="applications" className="flex-1">Applications</TabsTrigger>
-                                <TabsTrigger value="hire-requests" className="flex items-center gap-2 flex-1">
+                                <TabsTrigger value="overview" >Overview</TabsTrigger>
+                                <TabsTrigger value="insights" >Insights</TabsTrigger>
+                                <TabsTrigger value="content" >Content</TabsTrigger>
+                                <TabsTrigger value="applications" >Applications</TabsTrigger>
+                                <TabsTrigger value="hire-requests" className="flex items-center gap-2 ">
                                     Leads
                                     {hireRequests?.filter((r: any) => r.status === 'pending').length ? (
                                         <span className="bg-blue-500 text-white text-[10px] px-1.5 py-0.5 rounded-full">{hireRequests.filter((r: any) => r.status === 'pending').length}</span>
@@ -484,25 +512,25 @@ export default function AdminDashboard() {
                                 </TabsTrigger>
                             </>
                         )}
-                        <TabsTrigger value="projects" className="flex-1">Projects</TabsTrigger>
-                        <TabsTrigger value="users" className="flex-1">Users</TabsTrigger>
+                        <TabsTrigger value="projects" >Projects</TabsTrigger>
+                        <TabsTrigger value="users" >Users</TabsTrigger>
                         {user?.role === 'admin' && (
-                            <TabsTrigger value="financials" className="flex-1">Financials</TabsTrigger>
+                            <TabsTrigger value="financials" >Financials</TabsTrigger>
                         )}
-                        <TabsTrigger value="messages" className="flex items-center gap-2 flex-1">
+                        <TabsTrigger value="messages" className="flex items-center gap-2 ">
                             Support
                             {unreadCounts?.support ? (
                                 <span className="bg-red-500 text-white text-[10px] px-1.5 py-0.5 rounded-full">{unreadCounts.support}</span>
                             ) : null}
                         </TabsTrigger>
-                        <TabsTrigger value="audit-logs" className="flex items-center gap-2 flex-1">
+                        <TabsTrigger value="audit-logs" className="flex items-center gap-2">
                             Audit Logs
                         </TabsTrigger>
                         {user?.role === 'admin' && (
-                            <TabsTrigger value="legal" className="flex-1 text-red-600 font-bold">Legal</TabsTrigger>
+                            <TabsTrigger value="legal" className=" text-red-600 font-bold">Legal</TabsTrigger>
                         )}
                         {user?.role === 'admin' && (
-                            <TabsTrigger value="settings" className="flex-1">Settings</TabsTrigger>
+                            <TabsTrigger value="settings" >Settings</TabsTrigger>
                         )}
                     </TabsList>
 
@@ -1115,7 +1143,8 @@ export default function AdminDashboard() {
                                 <Button onClick={() => refetchProjects()} variant="default" size="sm">Refresh</Button>
                             </CardHeader>
                             <CardContent>
-                                <Table>
+                                <div className="overflow-y-auto max-h-96">
+                                    <Table>
                                     <TableHeader>
                                         <TableRow>
                                             <TableHead>Project Name</TableHead>
@@ -1219,6 +1248,7 @@ export default function AdminDashboard() {
                                         )}
                                     </TableBody>
                                 </Table>
+                                </div>
                             </CardContent>
                         </Card>
                     </TabsContent>

@@ -52,7 +52,11 @@ export class MessageController {
 
     markAsRead = async (req: AuthRequest, res: Response, next: NextFunction) => {
         try {
-            const result = await this.messageService.markAsRead(req.user!.id, req.user!.role, req.body);
+            const result = await this.messageService.markAsRead(
+                req.user!.id,
+                req.user!.role,
+                req.body
+            );
             res.json(result);
         } catch (error: any) {
             next(error);

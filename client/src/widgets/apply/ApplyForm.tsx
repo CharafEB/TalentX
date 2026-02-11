@@ -1,16 +1,91 @@
-'use client';
+"use client";
 
-import React, { useState } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import React, { useState } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import * as z from "zod";
 import { Button } from "@/shared/components/ui/button";
 import { Input } from "@/shared/components/ui/input";
 import { Label } from "@/shared/components/ui/label";
-import { ChevronRight, ChevronLeft, Upload, CheckCircle2 } from 'lucide-react';
-import { toast } from 'sonner';
-import { API_URL } from '@/shared/api/talentXApi';
+import { ChevronRight, ChevronLeft, Upload, CheckCircle2 } from "lucide-react";
+import { toast } from "sonner";
+import { apiClient } from "@/shared/api/client";
+import { handleFormErrors } from "@/shared/lib/form-errors";
+
+// Define the validation schema
+const formSchema = z
+  .object({
+    fullName: z.string().min(1, "Full name is required"),
+    email: z.string().email("Invalid email address"),
+    role: z.string().min(1, "Role is required"),
+
+    // Agency fields
+    agencyName: z.string().optional(),
+    companyWebsite: z.string().optional(),
+    linkedinCompany: z.string().optional(),
+    teamSize: z.string().optional(),
+    foundedYear: z.string().optional(),
+
+    // Talent fields
+    linkedin: z.string().optional(),
+    portfolio: z.string().optional(),
+    experience: z.string().optional(),
+  })
+  .superRefine((data, ctx) => {
+    if (data.role === "agency") {
+      if (!data.agencyName)
+        ctx.addIssue({
+          code: "custom",
+          path: ["agencyName"],
+          message: "Agency name is required",
+        });
+      if (!data.companyWebsite)
+        ctx.addIssue({
+          code: "custom",
+          path: ["companyWebsite"],
+          message: "Company website is required",
+        });
+      if (!data.linkedinCompany)
+        ctx.addIssue({
+          code: "custom",
+          path: ["linkedinCompany"],
+          message: "LinkedIn company page is required",
+        });
+      if (!data.teamSize)
+        ctx.addIssue({
+          code: "custom",
+          path: ["teamSize"],
+          message: "Team size is required",
+        });
+      if (!data.foundedYear)
+        ctx.addIssue({
+          code: "custom",
+          path: ["foundedYear"],
+          message: "Founded year is required",
+        });
+    } else {
+      // Talent validations
+
+        if (!data.linkedin)
+            ctx.addIssue({
+            code: "custom",
+            path: ["linkedin"],
+            message: "LinkedIn profile is required",
+            });
+        if (!data.experience)
+            ctx.addIssue({
+            code: "custom",
+            path: ["experience"],
+            message: "Experience is required",
+            });
+    }
+  });
+
+type FormData = z.infer<typeof formSchema>;
 
 interface ApplyFormProps {
-    onSuccess: () => void;
+  onSuccess: () => void;
 }
 
 export default function ApplyForm({ onSuccess }: ApplyFormProps) {
@@ -136,7 +211,7 @@ export default function ApplyForm({ onSuccess }: ApplyFormProps) {
                         >
                             <div className="mb-8">
                                 <h2 className="text-3xl font-bold text-[#1a1a2e] mb-2">Basic Information</h2>
-                                <p className="text-gray-500">Let's start with the basics.</p>
+                                <p className="text-gray-500">Let&apos;s start with the basics.</p>
                             </div>
 
                             {/* Role Toggle */}
@@ -317,144 +392,178 @@ export default function ApplyForm({ onSuccess }: ApplyFormProps) {
                             exit={{ opacity: 0, x: -20 }}
                             className="space-y-6"
                         >
-                            <div className="mb-8">
-                                <h2 className="text-3xl font-bold text-[#1a1a2e] mb-2">Professional Details</h2>
-                                <p className="text-gray-500">Tell us about your professional background.</p>
-                            </div>
+                        <option value="">Select a role</option>
+                        <option value="developer">Software Developer</option>
+                        <option value="designer">Designer</option>
+                        <option value="finance">Finance Expert</option>
+                        <option value="product">Product Manager</option>
+                        <option value="project">Project Manager</option>
+                        </select>
+                         {errors.role && <p className="mt-1 text-sm text-red-500">{errors.role.message}</p>}
+                    </div>
+                  </div>
+                )}
+              </div>
 
-                            <div className="space-y-2">
-                                <Label htmlFor="linkedin" className="text-black font-semibold">LinkedIn Profile URL <span className="text-red-500">*</span></Label>
-                                <Input
-                                    id="linkedin"
-                                    name="linkedin"
-                                    placeholder="https://linkedin.com/in/username"
-                                    value={formData.linkedin}
-                                    onChange={handleInputChange}
-                                    required
-                                    className="h-12 rounded-xl bg-white border-gray-200 focus:border-[#204ecf] focus:ring-[#204ecf]"
-                                />
-                            </div>
+              <Button
+                type="button"
+                onClick={nextStep}
+                className="w-full h-14 bg-[#204ecf] hover:bg-[#1a3da8] text-white font-bold rounded-xl mt-8"
+              >
+                Next Step
+                <ChevronRight className="w-5 h-5 ml-2" />
+              </Button>
+            </motion.div>
+          )}
 
-                            <div className="space-y-2">
-                                <Label htmlFor="portfolio" className="text-black font-semibold">Portfolio URL (Optional)</Label>
-                                <Input
-                                    id="portfolio"
-                                    name="portfolio"
-                                    placeholder="https://yourportfolio.com"
-                                    value={formData.portfolio}
-                                    onChange={handleInputChange}
-                                    className="h-12 rounded-xl bg-white border-gray-200 focus:border-[#204ecf] focus:ring-[#204ecf]"
-                                />
-                            </div>
+          {step === 2 && !isAgency && (
+            <motion.div
+              key="step2"
+              initial={{ opacity: 0, x: 20 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: -20 }}
+              className="space-y-6"
+            >
+              <div className="mb-8">
+                <h2 className="text-3xl font-bold text-[#1a1a2e] mb-2">
+                  Professional Details
+                </h2>
+                <p className="text-gray-500">
+                  Tell us about your professional background.
+                </p>
+              </div>
 
-                            <div className="space-y-2">
-                                <Label htmlFor="experience" className="text-black font-semibold">Years of Experience <span className="text-red-500">*</span></Label>
-                                <Input
-                                    id="experience"
-                                    name="experience"
-                                    type="number"
-                                    placeholder="5"
-                                    value={formData.experience}
-                                    onChange={handleInputChange}
-                                    required
-                                    className="h-12 rounded-xl bg-white border-gray-200 focus:border-[#204ecf] focus:ring-[#204ecf]"
-                                />
-                            </div>
+              <div className="space-y-2">
+                <Label htmlFor="linkedin" className="text-black font-semibold">
+                  LinkedIn Profile URL <span className="text-red-500">*</span>
+                </Label>
+                <Input
+                  id="linkedin"
+                  placeholder="https://linkedin.com/in/username"
+                  className="h-12 rounded-xl bg-white border-gray-200 focus:border-[#204ecf] focus:ring-[#204ecf]"
+                  error={errors.linkedin?.message}
+                  {...register("linkedin")}
+                />
+              </div>
 
-                            <div className="flex gap-4 mt-8">
-                                <Button
-                                    type="button"
-                                    variant="outline"
-                                    onClick={prevStep}
-                                    className="flex-1 h-14 border-2 border-gray-100 font-bold rounded-xl"
-                                >
-                                    <ChevronLeft className="w-5 h-5 mr-2" />
-                                    Back
-                                </Button>
-                                <Button
-                                    type="button"
-                                    onClick={() => {
-                                        if (!formData.linkedin || !formData.experience) {
-                                            toast.error("Required fields missing", { description: "Please provide your LinkedIn profile and years of experience." });
-                                            return;
-                                        }
-                                        nextStep();
-                                    }}
-                                    className="flex-[2] h-14 bg-[#204ecf] hover:bg-[#1a3da8] text-white font-bold rounded-xl"
-                                >
-                                    Next Step
-                                    <ChevronRight className="w-5 h-5 ml-2" />
-                                </Button>
-                            </div>
-                        </motion.div>
-                    )}
+              <div className="space-y-2">
+                <Label htmlFor="portfolio" className="text-black font-semibold">
+                  Portfolio URL (Optional)
+                </Label>
+                <Input
+                  id="portfolio"
+                  placeholder="https://yourportfolio.com"
+                  className="h-12 rounded-xl bg-white border-gray-200 focus:border-[#204ecf] focus:ring-[#204ecf]"
+                  error={errors.portfolio?.message}
+                  {...register("portfolio")}
+                />
+              </div>
 
-                    {step === 3 && (
-                        <motion.div
-                            key="step3"
-                            initial={{ opacity: 0, x: 20 }}
-                            animate={{ opacity: 1, x: 0 }}
-                            exit={{ opacity: 0, x: -20 }}
-                            className="space-y-6"
-                        >
-                            <div className="mb-8">
-                                <h2 className="text-3xl font-bold text-[#1a1a2e] mb-2">
-                                    {formData.role === 'agency' ? 'Company Profile' : 'Resume & CV'}
-                                </h2>
-                                <p className="text-gray-500">
-                                    {formData.role === 'agency' ? 'Upload your company profile/deck (PDF).' : 'Upload your latest resume to complete.'}
-                                </p>
-                            </div>
+              <div className="space-y-2">
+                <Label htmlFor="experience" className="text-black font-semibold">
+                  Years of Experience <span className="text-red-500">*</span>
+                </Label>
+                <Input
+                  id="experience"
+                  type="number"
+                  placeholder="5"
+                  className="h-12 rounded-xl bg-white border-gray-200 focus:border-[#204ecf] focus:ring-[#204ecf]"
+                  error={errors.experience?.message}
+                  {...register("experience")}
+                />
+              </div>
 
-                            <div className="border-2 border-dashed border-gray-200 rounded-[2rem] p-12 text-center hover:border-[#204ecf] transition-colors cursor-pointer group relative">
-                                <input
-                                    type="file"
-                                    accept=".pdf,.doc,.docx"
-                                    onChange={handleFileChange}
-                                    className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
-                                />
-                                <div className="w-16 h-16 bg-blue-50 rounded-2xl flex items-center justify-center mx-auto mb-4 group-hover:bg-[#204ecf] group-hover:text-white transition-colors">
-                                    <Upload className="w-8 h-8 text-[#204ecf] group-hover:text-white" />
-                                </div>
-                                <p className="font-bold text-[#1a1a2e] mb-1">
-                                    {resumeFile ? resumeFile.name : (formData.role === 'agency' ? "Click to upload Company Profile" : "Click to upload Resume")}
-                                </p>
-                                <p className="text-sm text-gray-500">PDF, DOCX (Max 10MB)</p>
-                            </div>
+              <div className="flex gap-4 mt-8">
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={prevStep}
+                  className="flex-1 h-14 border-2 border-gray-100 font-bold rounded-xl"
+                >
+                  <ChevronLeft className="w-5 h-5 mr-2" />
+                  Back
+                </Button>
+                <Button
+                  type="button"
+                  onClick={nextStep}
+                  className="flex-[2] h-14 bg-[#204ecf] hover:bg-[#1a3da8] text-white font-bold rounded-xl"
+                >
+                  Next Step
+                  <ChevronRight className="w-5 h-5 ml-2" />
+                </Button>
+              </div>
+            </motion.div>
+          )}
 
-                            <div className="flex items-center gap-3 p-4 bg-blue-50 rounded-xl border border-blue-100">
-                                <CheckCircle2 className="w-5 h-5 text-[#204ecf]" />
-                                <p className="text-xs text-gray-600">By submitting, you agree to our Terms of Service and Privacy Policy.</p>
-                            </div>
+          {step === 3 && (
+            <motion.div
+              key="step3"
+              initial={{ opacity: 0, x: 20 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: -20 }}
+              className="space-y-6"
+            >
+              <div className="mb-8">
+                <h2 className="text-3xl font-bold text-[#1a1a2e] mb-2">
+                  {isAgency ? "Company Profile" : "Resume & CV"}
+                </h2>
+                <p className="text-gray-500">
+                  {isAgency
+                    ? "Upload your company profile/deck (PDF)."
+                    : "Upload your latest resume to complete."}
+                </p>
+              </div>
 
-                            <div className="flex gap-4 mt-8">
-                                <Button
-                                    type="button"
-                                    variant="outline"
-                                    onClick={() => {
-                                        if (formData.role === 'agency') {
-                                            setStep(1); // Go back to Basic Info for Agency
-                                        } else {
-                                            prevStep();
-                                        }
-                                    }}
-                                    className="flex-1 h-14 border-2 border-gray-100 font-bold rounded-xl"
-                                >
-                                    <ChevronLeft className="w-5 h-5 mr-2" />
-                                    Back
-                                </Button>
-                                <Button
-                                    type="submit"
-                                    disabled={isSubmitting}
-                                    className="flex-[2] h-14 bg-[#00c853] hover:bg-[#009624] text-white font-bold rounded-xl shadow-lg shadow-green-900/20"
-                                >
-                                    {isSubmitting ? "Submitting..." : "Submit Application"}
-                                </Button>
-                            </div>
-                        </motion.div>
-                    )}
-                </AnimatePresence>
-            </form>
-        </div>
-    );
+              <div className="border-2 border-dashed border-gray-200 rounded-[2rem] p-12 text-center hover:border-[#204ecf] transition-colors cursor-pointer group relative">
+                <input
+                  type="file"
+                  accept=".pdf,.doc,.docx"
+                  onChange={handleFileChange}
+                  className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                />
+                <div className="w-16 h-16 bg-blue-50 rounded-2xl flex items-center justify-center mx-auto mb-4 group-hover:bg-[#204ecf] group-hover:text-white transition-colors">
+                  <Upload className="w-8 h-8 text-[#204ecf] group-hover:text-white" />
+                </div>
+                <p className="font-bold text-[#1a1a2e] mb-1">
+                  {resumeFile
+                    ? resumeFile.name
+                    : isAgency
+                    ? "Click to upload Company Profile"
+                    : "Click to upload Resume"}
+                </p>
+                <p className="text-sm text-gray-500">PDF, DOCX (Max 10MB)</p>
+              </div>
+
+              <div className="flex items-center gap-3 p-4 bg-blue-50 rounded-xl border border-blue-100">
+                <CheckCircle2 className="w-5 h-5 text-[#204ecf]" />
+                <p className="text-xs text-gray-600">
+                  By submitting, you agree to our Terms of Service and Privacy
+                  Policy.
+                </p>
+              </div>
+
+              <div className="flex gap-4 mt-8">
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={prevStep}
+                  className="flex-1 h-14 border-2 border-gray-100 font-bold rounded-xl"
+                >
+                  <ChevronLeft className="w-5 h-5 mr-2" />
+                  Back
+                </Button>
+                <Button
+                  type="submit"
+                  disabled={isSubmitting}
+                  className="flex-[2] h-14 bg-[#00c853] hover:bg-[#009624] text-white font-bold rounded-xl shadow-lg shadow-green-900/20"
+                >
+                  {isSubmitting ? "Submitting..." : "Submit Application"}
+                </Button>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </form>
+    </div>
+  );
 }

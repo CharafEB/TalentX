@@ -14,7 +14,10 @@ interface WorkVerificationProps {
     currentUser: User;
 }
 
-export const WorkVerificationWidgets: React.FC<WorkVerificationProps> = ({ projectId, currentUser }) => {
+export const WorkVerificationWidgets: React.FC<WorkVerificationProps> = ({
+    projectId,
+    currentUser,
+}) => {
     const [activeTab, setActiveTab] = useState<'time' | 'milestones'>('time');
     const [timeLogs, setTimeLogs] = useState<any[]>([]);
     const [milestones, setMilestones] = useState<any[]>([]);
@@ -25,7 +28,7 @@ export const WorkVerificationWidgets: React.FC<WorkVerificationProps> = ({ proje
         try {
             const [logs, mstones] = await Promise.all([
                 talentXApi.WorkVerification.TimeLogs.listByProject(projectId),
-                talentXApi.WorkVerification.Milestones.listByProject(projectId)
+                talentXApi.WorkVerification.Milestones.listByProject(projectId),
             ]);
             setTimeLogs(logs);
             setMilestones(mstones);
@@ -45,20 +48,22 @@ export const WorkVerificationWidgets: React.FC<WorkVerificationProps> = ({ proje
             <div className="bg-gray-100 p-1 rounded-xl flex items-center gap-1 w-fit">
                 <button
                     onClick={() => setActiveTab('time')}
-                    className={`flex items-center gap-2 px-4 py-1.5 rounded-lg text-xs font-bold transition-all ${activeTab === 'time'
-                        ? 'bg-white text-[#204ecf] shadow-sm'
-                        : 'text-gray-500 hover:text-gray-700'
-                        }`}
+                    className={`flex items-center gap-2 px-4 py-1.5 rounded-lg text-xs font-bold transition-all ${
+                        activeTab === 'time'
+                            ? 'bg-white text-[#204ecf] shadow-sm'
+                            : 'text-gray-500 hover:text-gray-700'
+                    }`}
                 >
                     <Clock className="w-3.5 h-3.5" />
                     Time Tracking
                 </button>
                 <button
                     onClick={() => setActiveTab('milestones')}
-                    className={`flex items-center gap-2 px-4 py-1.5 rounded-lg text-xs font-bold transition-all ${activeTab === 'milestones'
-                        ? 'bg-white text-[#204ecf] shadow-sm'
-                        : 'text-gray-500 hover:text-gray-700'
-                        }`}
+                    className={`flex items-center gap-2 px-4 py-1.5 rounded-lg text-xs font-bold transition-all ${
+                        activeTab === 'milestones'
+                            ? 'bg-white text-[#204ecf] shadow-sm'
+                            : 'text-gray-500 hover:text-gray-700'
+                    }`}
                 >
                     <CheckCircle2 className="w-3.5 h-3.5" />
                     Milestones
@@ -104,7 +109,7 @@ const TimeTrackingSection = ({ projectId, currentUser, logs, onRefresh }: any) =
                 projectId,
                 hours: parseFloat(hours),
                 description,
-                date
+                date,
             });
             toast.success('Time logged successfully');
             setHours('');
@@ -139,14 +144,14 @@ const TimeTrackingSection = ({ projectId, currentUser, logs, onRefresh }: any) =
     };
 
     return (
-        <Card className="rounded-2xl border-[#e2e8f0] shadow-sm overflow-hidden">
-            <CardHeader className="bg-gray-50/50 border-b flex flex-row items-center justify-between py-4">
-                <CardTitle className="text-lg flex items-center gap-2">
-                    <Clock className="w-5 h-5 text-blue-600" />
+        <Card className="rounded-2xl bg-white shadow-sm overflow-hidden">
+            <CardHeader className="border-b flex flex-row items-center justify-between py-4">
+                <CardTitle className="text-lg text-black flex items-center gap-2">
+                    <Clock className="w-5 h-5 text-black" />
                     Work Logs
                 </CardTitle>
                 {isTalent && !showLogForm && (
-                    <Button size="sm" onClick={() => setShowLogForm(true)} className="bg-[#204ecf] hover:bg-[#1a3da8] text-white rounded-xl">
+                    <Button size="sm" onClick={() => setShowLogForm(true)} className=" hover:bg-[#1a3da8] text-white rounded-xl">
                         <Plus className="w-4 h-4 mr-2" />
                         Log Hours
                     </Button>
@@ -154,41 +159,54 @@ const TimeTrackingSection = ({ projectId, currentUser, logs, onRefresh }: any) =
             </CardHeader>
             <CardContent className="p-0">
                 {showLogForm && (
-                    <form onSubmit={handleLogTime} className="p-6 bg-blue-50/30 border-b space-y-4">
-                        <div className="grid grid-cols-2 gap-4">
+                    <form onSubmit={handleLogTime} className="p-4 sm:p-6 border-b space-y-4">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                             <div className="space-y-2">
-                                <Label>Date</Label>
-                                <Input
-                                    type="date"
-                                    value={date}
-                                    onChange={(e) => setDate(e.target.value)}
-                                    className="rounded-xl"
-                                />
+                                <Label className="text-sm font-medium">Date</Label>
+                                <div className="flex w-full items-center">
+                                    <Input
+                                        type="date"
+                                        value={date}
+                                        onChange={(e) => setDate(e.target.value)}
+                                        className="rounded-xl w-full"
+                                    />
+                                </div>
                             </div>
                             <div className="space-y-2">
-                                <Label>Hours</Label>
+                                <Label className="text-sm font-medium">Hours</Label>
                                 <Input
                                     type="number"
                                     step="0.5"
                                     placeholder="e.g. 4.5"
                                     value={hours}
                                     onChange={(e) => setHours(e.target.value)}
-                                    className="rounded-xl"
+                                    className="rounded-xl  w-full"
                                 />
                             </div>
                         </div>
                         <div className="space-y-2">
-                            <Label>What did you work on?</Label>
+                            <Label className="text-sm font-medium">What did you work on?</Label>
                             <Textarea
                                 placeholder="Describe your activity..."
                                 value={description}
                                 onChange={(e) => setDescription(e.target.value)}
-                                className="rounded-xl"
+                                className="rounded-xl  w-full min-h-[80px] sm:min-h-[100px]"
+                                rows={3}
                             />
                         </div>
-                        <div className="flex gap-2 justify-end">
-                            <Button variant="ghost" onClick={() => setShowLogForm(false)} className="rounded-xl">Cancel</Button>
-                            <Button type="submit" disabled={isSubmitting} className="rounded-xl">
+                        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-end gap-2 sm:gap-3">
+                            <Button 
+                                variant="ghost" 
+                                onClick={() => setShowLogForm(false)} 
+                                className="rounded-xl w-full sm:w-auto order-2 sm:order-1"
+                            >
+                                Cancel
+                            </Button>
+                            <Button 
+                                type="submit" 
+                                disabled={isSubmitting} 
+                                className="rounded-xl w-full sm:w-auto order-1 sm:order-2 bg-[#204ecf] hover:bg-[#1a3da8] text-white"
+                            >
                                 {isSubmitting ? 'Submitting...' : 'Submit Log'}
                             </Button>
                         </div>
@@ -197,32 +215,59 @@ const TimeTrackingSection = ({ projectId, currentUser, logs, onRefresh }: any) =
 
                 <div className="divide-y">
                     {logs.length === 0 ? (
-                        <div className="p-12 text-center text-gray-500">
-                            No time logs found.
-                        </div>
+                        <div className="p-12 text-center text-gray-500">No time logs found.</div>
                     ) : (
                         logs.map((log: any) => (
-                            <div key={log.id} className="p-4 flex items-start justify-between hover:bg-gray-50 transition-colors">
+                            <div
+                                key={log.id}
+                                className="p-4 flex items-start justify-between hover:bg-gray-50 transition-colors"
+                            >
                                 <div className="space-y-1">
                                     <div className="flex items-center gap-2">
                                         <span className="font-medium">{log.hours} hrs</span>
                                         <span className="text-xs text-gray-400">•</span>
-                                        <span className="text-sm text-gray-600">{new Date(log.date).toLocaleDateString()}</span>
+                                        <span className="text-sm text-gray-600">
+                                            {new Date(log.date).toLocaleDateString()}
+                                        </span>
                                     </div>
                                     <p className="text-sm text-gray-500">{log.description}</p>
                                     <div className="flex items-center gap-2 mt-2">
-                                        {log.status === 'pending' && <span className="text-[10px] px-2 py-0.5 bg-yellow-100 text-yellow-700 rounded-full font-medium">Pending Review</span>}
-                                        {log.status === 'approved' && <span className="text-[10px] px-2 py-0.5 bg-green-100 text-green-700 rounded-full font-medium">Approved</span>}
-                                        {log.status === 'rejected' && <span className="text-[10px] px-2 py-0.5 bg-red-100 text-red-700 rounded-full font-medium">Rejected</span>}
-                                        <span className="text-[10px] text-gray-400">by {log.talent?.user?.full_name}</span>
+                                        {log.status === 'pending' && (
+                                            <span className="text-[10px] px-2 py-0.5 bg-yellow-100 text-yellow-700 rounded-full font-medium">
+                                                Pending Review
+                                            </span>
+                                        )}
+                                        {log.status === 'approved' && (
+                                            <span className="text-[10px] px-2 py-0.5 bg-green-100 text-green-700 rounded-full font-medium">
+                                                Approved
+                                            </span>
+                                        )}
+                                        {log.status === 'rejected' && (
+                                            <span className="text-[10px] px-2 py-0.5 bg-red-100 text-red-700 rounded-full font-medium">
+                                                Rejected
+                                            </span>
+                                        )}
+                                        <span className="text-[10px] text-gray-400">
+                                            by {log.talent?.user?.full_name}
+                                        </span>
                                     </div>
                                 </div>
                                 {isClient && log.status === 'pending' && (
                                     <div className="flex gap-1">
-                                        <Button variant="ghost" size="icon" onClick={() => handleApprove(log.id)} className="text-green-600 hover:text-green-700 hover:bg-green-50 rounded-lg">
+                                        <Button
+                                            variant="ghost"
+                                            size="icon"
+                                            onClick={() => handleApprove(log.id)}
+                                            className="text-green-600 hover:text-green-700 hover:bg-green-50 rounded-lg"
+                                        >
                                             <CheckCircle2 className="w-5 h-5" />
                                         </Button>
-                                        <Button variant="ghost" size="icon" onClick={() => handleReject(log.id)} className="text-red-600 hover:text-red-700 hover:bg-red-50 rounded-lg">
+                                        <Button
+                                            variant="ghost"
+                                            size="icon"
+                                            onClick={() => handleReject(log.id)}
+                                            className="text-red-600 hover:text-red-700 hover:bg-red-50 rounded-lg"
+                                        >
                                             <XCircle className="w-5 h-5" />
                                         </Button>
                                     </div>
@@ -254,7 +299,7 @@ const MilestoneSection = ({ projectId, currentUser, milestones, onRefresh }: any
                 projectId,
                 title,
                 description,
-                amount: parseFloat(amount)
+                amount: parseFloat(amount),
             });
             toast.success('Milestone created');
             setTitle('');
@@ -297,7 +342,11 @@ const MilestoneSection = ({ projectId, currentUser, milestones, onRefresh }: any
                     Payment Milestones
                 </CardTitle>
                 {isClient && !showForm && (
-                    <Button size="sm" onClick={() => setShowForm(true)} className="bg-[#204ecf] hover:bg-[#1a3da8] text-white rounded-xl">
+                    <Button
+                        size="sm"
+                        onClick={() => setShowForm(true)}
+                        className="bg-[#204ecf] hover:bg-[#1a3da8] text-white rounded-xl"
+                    >
                         <Plus className="w-4 h-4 mr-2" />
                         Add Milestone
                     </Button>
@@ -313,7 +362,7 @@ const MilestoneSection = ({ projectId, currentUser, milestones, onRefresh }: any
                                     placeholder="e.g. MVP Launch"
                                     value={title}
                                     onChange={(e) => setTitle(e.target.value)}
-                                    className="rounded-xl"
+                                    className="rounded-xl bg-white text-black"
                                 />
                             </div>
                             <div className="space-y-2">
@@ -323,7 +372,7 @@ const MilestoneSection = ({ projectId, currentUser, milestones, onRefresh }: any
                                     placeholder="0.00"
                                     value={amount}
                                     onChange={(e) => setAmount(e.target.value)}
-                                    className="rounded-xl"
+                                    className="rounded-xl bg-white text-black"
                                 />
                             </div>
                         </div>
@@ -333,11 +382,17 @@ const MilestoneSection = ({ projectId, currentUser, milestones, onRefresh }: any
                                 placeholder="What needs to be finished?"
                                 value={description}
                                 onChange={(e) => setDescription(e.target.value)}
-                                className="rounded-xl"
+                                className="rounded-xl bg-white text-black"
                             />
                         </div>
                         <div className="flex gap-2 justify-end">
-                            <Button variant="ghost" onClick={() => setShowForm(false)} className="rounded-xl">Cancel</Button>
+                            <Button
+                                variant="ghost"
+                                onClick={() => setShowForm(false)}
+                                className="rounded-xl"
+                            >
+                                Cancel
+                            </Button>
                             <Button type="submit" disabled={isSubmitting} className="rounded-xl">
                                 Create Milestone
                             </Button>
@@ -355,26 +410,50 @@ const MilestoneSection = ({ projectId, currentUser, milestones, onRefresh }: any
                             <div key={m.id} className="p-6 hover:bg-gray-50 transition-colors">
                                 <div className="flex items-center justify-between mb-2">
                                     <h4 className="font-semibold text-gray-800">{m.title}</h4>
-                                    <span className="font-bold text-lg text-blue-700">${m.amount.toLocaleString()}</span>
+                                    <span className="font-bold text-lg text-blue-700">
+                                        ${m.amount.toLocaleString()}
+                                    </span>
                                 </div>
                                 <p className="text-sm text-gray-500 mb-4">{m.description}</p>
 
                                 <div className="flex items-center justify-between">
                                     <div className="flex items-center gap-2">
-                                        {m.status === 'pending' && <span className="text-xs px-2.5 py-1 bg-gray-100 text-gray-600 rounded-lg border font-medium">Draft</span>}
-                                        {m.status === 'requested' && <span className="text-xs px-2.5 py-1 bg-blue-100 text-blue-700 rounded-lg border border-blue-200 font-medium flex items-center gap-1"><AlertCircle className="w-3 h-3" /> Approval Requested</span>}
-                                        {m.status === 'approved' && <span className="text-xs px-2.5 py-1 bg-green-100 text-green-700 rounded-lg border border-green-200 font-medium flex items-center gap-1"><CheckCircle2 className="w-3 h-3" /> Approved</span>}
+                                        {m.status === 'pending' && (
+                                            <span className="text-xs px-2.5 py-1 bg-gray-100 text-gray-600 rounded-lg border font-medium">
+                                                Draft
+                                            </span>
+                                        )}
+                                        {m.status === 'requested' && (
+                                            <span className="text-xs px-2.5 py-1 bg-blue-100 text-blue-700 rounded-lg border border-blue-200 font-medium flex items-center gap-1">
+                                                <AlertCircle className="w-3 h-3" /> Approval
+                                                Requested
+                                            </span>
+                                        )}
+                                        {m.status === 'approved' && (
+                                            <span className="text-xs px-2.5 py-1 bg-green-100 text-green-700 rounded-lg border border-green-200 font-medium flex items-center gap-1">
+                                                <CheckCircle2 className="w-3 h-3" /> Approved
+                                            </span>
+                                        )}
                                     </div>
 
                                     {isTalent && m.status === 'pending' && (
-                                        <Button size="sm" variant="outline" onClick={() => handleRequestApproval(m.id)} className="rounded-xl">
+                                        <Button
+                                            size="sm"
+                                            variant="outline"
+                                            onClick={() => handleRequestApproval(m.id)}
+                                            className="rounded-xl"
+                                        >
                                             <Send className="w-3.5 h-3.5 mr-2" />
                                             Submit for Approval
                                         </Button>
                                     )}
 
                                     {isClient && m.status === 'requested' && (
-                                        <Button size="sm" onClick={() => handleApprove(m.id)} className="rounded-xl bg-green-600 hover:bg-green-700">
+                                        <Button
+                                            size="sm"
+                                            onClick={() => handleApprove(m.id)}
+                                            className="rounded-xl bg-green-600 hover:bg-green-700"
+                                        >
                                             Approve & Release Funds
                                         </Button>
                                     )}

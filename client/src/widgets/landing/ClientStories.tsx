@@ -4,17 +4,9 @@ import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Play, X } from 'lucide-react';
 import { Button } from "@/shared/components/ui/button";
-import { useQuery } from '@tanstack/react-query';
+import { useSmartQuery } from '@/shared/lib/smartQuery';
 import { talentXApi } from '@/shared/api/talentXApi';
-
-interface Story {
-    id: string;
-    company: string;
-    logo: string;
-    thumbnail: string;
-    videoUrl: string;
-}
-
+import { toClientStories, type ClientStory } from './clientStories.utils';
 
 // Helper function to convert YouTube URL to embed URL
 const getYouTubeEmbedUrl = (url: string): string | null => {
@@ -32,19 +24,13 @@ const getYouTubeEmbedUrl = (url: string): string | null => {
 };
 
 export default function ClientStories() {
-    const [selectedStory, setSelectedStory] = useState<Story | null>(null);
+    const [selectedStory, setSelectedStory] = useState<ClientStory | null>(null);
 
-    const { data: caseStudies, isLoading } = useQuery({
+    const { data: caseStudies, isLoading } = useSmartQuery({
         queryKey: ['cms-case-studies'],
         queryFn: async () => {
             const items = await talentXApi.entities.CMS.CaseStudy.list();
-            return items.map(item => ({
-                id: item.id,
-                company: item.client_name || item.title,
-                logo: item.logo || 'https://upload.wikimedia.org/wikipedia/commons/f/fa/Apple_logo_black.svg',
-                thumbnail: item.image,
-                videoUrl: item.video_url || ''
-            }));
+            return toClientStories(items);
         }
     });
 
@@ -57,16 +43,22 @@ export default function ClientStories() {
                     viewport={{ once: true }}
                     className="text-center mb-16"
                 >
-                    <h2 className="text-4xl md:text-5xl font-bold mb-6 text-[#1a1a2e]">Why Organizations Choose TalentX</h2>
+                    <h2 className="text-4xl md:text-5xl font-bold mb-6 text-[#1a1a2e]">
+                        Why Organizations Choose TalentX
+                    </h2>
                     <p className="text-gray-500 max-w-3xl mx-auto text-lg">
-                        Discover the many ways in which our clients have embraced the benefits of working with TalentX.
+                        Discover the many ways in which our clients have embraced the benefits of
+                        working with TalentX.
                     </p>
                 </motion.div>
 
                 <div className="flex flex-wrap justify-center gap-4">
                     {isLoading ? (
-                        [1, 2, 3].map(i => (
-                            <div key={i} className="w-[380px] h-[400px] bg-gray-100 animate-pulse" />
+                        [1, 2, 3].map((i) => (
+                            <div
+                                key={i}
+                                className="w-[380px] h-[400px] bg-gray-100 animate-pulse"
+                            />
                         ))
                     ) : (caseStudies || []).length === 0 ? (
                         <p className="text-gray-400 italic">No case studies available yet.</p>
@@ -105,7 +97,9 @@ export default function ClientStories() {
                                     <div className="w-12 h-12 bg-blue-600 rounded-full flex items-center justify-center transition-transform group-hover:scale-110 shadow-lg shadow-blue-600/20">
                                         <Play className="w-6 h-6 text-white fill-white ml-0.5" />
                                     </div>
-                                    <span className="text-white font-bold text-base tracking-wide">Watch the video</span>
+                                    <span className="text-white font-bold text-base tracking-wide">
+                                        Watch the video
+                                    </span>
                                 </div>
                             </motion.div>
                         ))
@@ -138,7 +132,8 @@ export default function ClientStories() {
                                 <X className="w-6 h-6" />
                             </Button>
 
-                            {selectedStory.videoUrl && getYouTubeEmbedUrl(selectedStory.videoUrl) ? (
+                            {selectedStory.videoUrl &&
+                            getYouTubeEmbedUrl(selectedStory.videoUrl) ? (
                                 <iframe
                                     className="w-full h-full"
                                     src={`${getYouTubeEmbedUrl(selectedStory.videoUrl)}?autoplay=1`}
@@ -152,8 +147,12 @@ export default function ClientStories() {
                                         <div className="w-20 h-20 bg-blue-600 rounded-full flex items-center justify-center mx-auto mb-6">
                                             <Play className="w-8 h-8 text-white fill-white ml-1" />
                                         </div>
-                                        <h3 className="text-2xl font-bold text-white mb-2">{selectedStory.company}</h3>
-                                        <p className="text-gray-400 font-medium">No video preview available</p>
+                                        <h3 className="text-2xl font-bold text-white mb-2">
+                                            {selectedStory.company}
+                                        </h3>
+                                        <p className="text-gray-400 font-medium">
+                                            No video preview available
+                                        </p>
                                     </div>
                                 </div>
                             )}

@@ -38,7 +38,9 @@ export class WorkVerificationController {
 
     getTimeLogsByProject = async (req: Request, res: Response, next: NextFunction) => {
         try {
-            const timeLogs = await this.workVerificationService.getTimeLogsByProject(req.params.projectId);
+            const timeLogs = await this.workVerificationService.getTimeLogsByProject(
+                req.params.projectId
+            );
             res.json(timeLogs);
         } catch (error: any) {
             next(error);
@@ -56,7 +58,9 @@ export class WorkVerificationController {
 
     requestMilestoneApproval = async (req: Request, res: Response, next: NextFunction) => {
         try {
-            const milestone = await this.workVerificationService.requestMilestoneApproval(req.params.id);
+            const milestone = await this.workVerificationService.requestMilestoneApproval(
+                req.params.id
+            );
             res.json(milestone);
         } catch (error: any) {
             next(error);
@@ -74,7 +78,9 @@ export class WorkVerificationController {
 
     getMilestonesByProject = async (req: Request, res: Response, next: NextFunction) => {
         try {
-            const milestones = await this.workVerificationService.getMilestonesByProject(req.params.projectId);
+            const milestones = await this.workVerificationService.getMilestonesByProject(
+                req.params.projectId
+            );
             res.json(milestones);
         } catch (error: any) {
             next(error);

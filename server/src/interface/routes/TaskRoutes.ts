@@ -10,6 +10,7 @@ export const createTaskRoutes = (controller: TaskController) => {
     router.get('/', controller.listTasks);
     router.post('/', controller.createTask);
     router.put('/:id', controller.updateTask);
+    router.patch('/:id', controller.updateTask);
     router.delete('/:id', controller.deleteTask);
 
     return router;

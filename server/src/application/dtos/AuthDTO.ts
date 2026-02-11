@@ -46,9 +46,9 @@ import { z } from 'zod';
  *           type: string
  */
 export const RegisterSchema = z.object({
-    email: z.string().email("Invalid email").max(255),
-    password: z.string().min(6, "Password must be at least 6 characters").max(100),
-    full_name: z.string().min(1, "Full Name is required").max(100),
+    email: z.string().email('Invalid email').max(255),
+    password: z.string().min(6, 'Password must be at least 6 characters').max(100),
+    full_name: z.string().min(1, 'Full Name is required').max(100),
     role: z.enum(['client', 'talent', 'agency', 'admin', 'core_team']),
 
     // Optional / Role Specific
@@ -61,7 +61,7 @@ export const RegisterSchema = z.object({
 
 export const LoginSchema = z.object({
     email: z.string().email(),
-    password: z.string()
+    password: z.string(),
 });
 
 export type RegisterDTO = z.infer<typeof RegisterSchema>;
